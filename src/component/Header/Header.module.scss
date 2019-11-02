@@ -1,8 +1,54 @@
 
 .header {
   position: relative;
+  display: flex;
+  align-items: center;
   height: 80px;
   background: rgb(92,206,198);
+  box-sizing: border-box;
+  padding: 0 30px;
+}
+.iconLogo{
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  background: url("../img/logo.png");
+  background-size: 40px;
+  vertical-align: center;
+}
+.title{
+  display: inline-block;
+  margin-left: 20px;
+  height: 80px;
+  line-height: 80px;
+  font-size: 25px;
+  font-weight: 700;
+  color: #fff;
+  vertical-align: center;
+}
+.userBox {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  right: 30px;
+  height: 80px;
+  line-height: 80px;
+}
+
+.userIcon {
+  display: inline-block;
+  margin-right: 20px;
+  width: 25px;
+  height: 25px;
+  background: url("../img/user.png");
+  background-size: 25px;
+}
+.logout{
+  margin-left: 15px;
+  cursor: pointer;
+  &:hover{
+    text-decoration: underline;
+  }
 }
 
 //leftBox  rgb(45,62,78)

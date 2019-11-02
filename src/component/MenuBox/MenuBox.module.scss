@@ -1,0 +1,48 @@
+.menuBox {
+  position: relative;
+  float: left;
+  width: 200px;
+  height: 100%;
+  background: rgb(45,62,78);
+  z-index: 10;
+}
+.title{
+  margin: 30px auto 20px auto;
+  display: block;
+  width: 40px;
+  height: 40px;
+  background: url("../img/menu.png");
+  background-size: 40px;
+  text-align: center;
+  user-select: none;
+}
+.item{
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0 30px;
+  height: 40px;
+  line-height: 40px;
+  color: #fff;
+  box-sizing: border-box;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    background: rgb(30,43,60);
+  }
+}
+.itemActive{
+  border-left: 3px solid rgb(92,206,198);
+}
+
+.icon{
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+}
+.home{
+  background: url("../img/home.png");
+  background-size: 20px;
+}

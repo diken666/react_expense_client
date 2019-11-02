@@ -1,14 +1,34 @@
+@import '~antd/dist/antd.css';
+
 html, body {
+  font-size: 16px;
   margin: 0;
   padding: 0;
+  width: 100%;
+  height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /*overflow: hidden;*/
 }
+
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
+}
+#root, .container{
+  width: 100%;
+  height: 100%;
+}
+.container{
+  display: flex;
+  flex-direction: column;
+}
+.ctnBox {
+  position: relative;
+  background: rgb(236,240,243);
+  flex: 1;
 }
