@@ -7,9 +7,39 @@ export default class RightBox extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            visible: false
-        }
+            visible: false,
+            data: {
+                    A01: {
+                        water: null,
+                        elec: null,
+                        waterSpend: null,
+                        elecSpend: null
+                    }
+                }
+
+        };
+        this.dataInit = this.dataInit.bind(this);
     }
+    componentDidMount() {
+        this.dataInit();
+    }
+
+    dataInit(){
+        let result = {};
+        for ( let i=1; i<=13; i++ ){
+            let index = i.toString()[1] ? i.toString(): '0'+i.toString();
+            result[`A${index}`] = result[`B${index}`] = {
+                water: null,
+                elec: null,
+                waterSpend: null,
+                elecSpend: null
+            };
+        }
+        this.setState({
+            data: result
+        })
+    }
+
     click() {
         this.setState({
             visible: true
