@@ -2,10 +2,11 @@ import React from 'react';
 import Header from "./component/Header/Header";
 import MenuBox from "./component/MenuBox/MenuBox";
 import RightBox from "./component/RightBox/RightBox";
-import { Layout, Button } from 'antd';
+import { Layout, Button, message } from 'antd';
 import axios from 'axios';
 
 import style from './App.module.scss';
+import router from './router';
 
 class App extends React.Component{
     constructor ( props ) {
@@ -22,12 +23,33 @@ class App extends React.Component{
         })
     }
     getUserState(){
-        return axios.get('http://localhost:3000/getuserstate');
+        return axios.get(router.getUserState);
     }
-    loginClick(){
-        console.log('123');
+    getLoginState(id, psw){
+        return axios.post(router.getLoginState, {
+            id,
+            psw
+        })
+    }
+    async loginClick(){
+        let id = document.getElementById('id').value;
+        let psw = document.getElementById('psw').value;
+        if ( !id ){
+            message.warn('账号信息不能为空');
+            return
+        }
+        if ( !psw ){
+            message.warn('密码不能为空');
+            return
+        }
+        let data = ( await this.getLoginState(id, psw) ).data;
+        if ( data.state === 'error' ) {
+            message.warn(data.msg);
+            return
+        }
         this.setState({
-            loginLoading: true
+            loginLoading: true,
+            userState: "login"
         })
     }
     stateRender(state){
@@ -47,11 +69,11 @@ class App extends React.Component{
                             <form action="">
                                 <div className={style.inputItem}>
                                     <i className={[style.icon, style.userLogin].join(" ")} />
-                                    <input id="account" className={style.input} type="text"/>
+                                    <input id="id" className={style.input} type="text"/>
                                 </div>
                                 <div className={style.inputItem}>
                                     <i className={[style.icon, style.password].join(" ")} />
-                                    <input id="password" className={style.input} type="password"/>
+                                    <input id="psw" className={style.input} type="password"/>
                                 </div>
                                 <div className={style.loginBtn}>
                                     <Button loading={this.state.loginLoading} type="primary" block size={"large"} onClick={()=>this.loginClick()} >登陆</Button>
