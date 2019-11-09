@@ -1,6 +1,8 @@
 import React from 'react';
 import style from './RightBox.module.scss';
-import { Layout, Modal, Input } from 'antd';
+import { Layout, Modal, Input, message } from 'antd';
+import axios from 'axios';
+import router from "../../router";
 const { Content } = Layout;
 
 export default class RightBox extends React.Component {
@@ -8,35 +10,52 @@ export default class RightBox extends React.Component {
         super(props);
         this.state = {
             visible: false,
-            data: {
-                    A01: {
-                        water: null,
-                        elec: null,
-                        waterSpend: null,
-                        elecSpend: null
-                    }
-                }
+            data: {}
 
         };
         this.dataInit = this.dataInit.bind(this);
     }
-    componentDidMount() {
+    async componentDidMount() {
+        // console.log(await this.getRoomInfo());
         this.dataInit();
+
     }
 
-    dataInit(){
+    async getRoomInfo() {
+        let state = (await axios.get(router.getRoomInfo)).data.state || 'error';
+        let msg = (await axios.get(router.getRoomInfo)).data.msg || '获取信息失败';
+        let data = (await axios.get(router.getRoomInfo)).data.data || [];
+        if ( state === 'error' ) {
+            message.warn(msg)
+        }
+        return data
+    }
+
+    async dataInit(){
         let result = {};
-        for ( let i=1; i<=13; i++ ){
-            let index = i.toString()[1] ? i.toString(): '0'+i.toString();
-            result[`A${index}`] = result[`B${index}`] = {
-                water: null,
-                elec: null,
-                waterSpend: null,
-                elecSpend: null
-            };
+        let roomData = await this.getRoomInfo();
+        for ( let i=0; i<roomData.length; i++ ) {
+            if( result[roomData[i].rid] ) {
+                result[roomData[i].rid].dataArr.push({
+                    userId: roomData[i].userId,
+                    userName: roomData[i].userName,
+                    class: roomData[i].class
+                })
+            } else {
+                result[roomData[i].rid] = {};
+                let dataArr = [];
+                dataArr.push({
+                    userId: roomData[i].userId,
+                    userName: roomData[i].userName,
+                    class: roomData[i].class
+                });
+                result[roomData[i].rid].dataArr = dataArr;
+            }
         }
         this.setState({
             data: result
+        }, ()=>{
+            // console.log(result)
         })
     }
 
@@ -54,6 +73,36 @@ export default class RightBox extends React.Component {
         this.setState({
             visible: false
         })
+    }
+    tableRender(data){
+        let keysArr = Object.keys(data);
+        if( keysArr.length === 0 ) {
+            return (
+                <tr className={style.empty}>
+                    <td colSpan={"10"}>暂无数据</td>
+                </tr>
+            )
+        } else {
+            console.log(data);
+            let roomA = [];
+            let roomB = [];
+            // let data = this.state.data;
+            for ( let i=1; i<=13; i++ ) {
+                let index = i.toString()[1] ? i.toString(): "0"+i.toString()[0];
+                roomA.push({
+                    name: `A${index}`,
+                    data: data[`A${index}`].dataArr
+                });
+                // todo 注意处理B07这种无数据情况
+                console.log(`B${index}`, data[`B${index}`])
+                // roomB.push({
+                //     name: `B${index}`,
+                //     data: data[`B${index}`].dataArr
+                // });
+            }
+            console.log(roomA);
+            console.log(roomB);
+        }
     }
     render() {
         return (
@@ -75,26 +124,31 @@ export default class RightBox extends React.Component {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td rowSpan="2">A01</td>
-                                <td rowSpan="2" className={style.pointer} onClick={()=> this.click()}>11302 <br/> 11220 </td>
-                                <td rowSpan="2">8000 <br/> 9000</td>
-                                <td rowSpan="2">22 <br/> 110</td>
-                                <td>张三</td>
-                                <td>一号线</td>
-                                <td>31</td>
-                                <td>1000</td>
-                                <td>2000.20</td>
-                                <td>1000.20</td>
-                            </tr>
-                            <tr>
-                                <td>张三</td>
-                                <td>一号线</td>
-                                <td>31</td>
-                                <td>1000</td>
-                                <td>2000.20</td>
-                                <td>1000.20</td>
-                            </tr>
+
+                        {
+                            this.tableRender(this.state.data)
+                        }
+
+                            {/*<tr>*/}
+                            {/*    <td rowSpan="2">A01</td>*/}
+                            {/*    <td rowSpan="2" className={style.pointer} onClick={()=> this.click()}>11302 <br/> 11220 </td>*/}
+                            {/*    <td rowSpan="2">8000 <br/> 9000</td>*/}
+                            {/*    <td rowSpan="2">22 <br/> 110</td>*/}
+                            {/*    <td>张三</td>*/}
+                            {/*    <td>一号线</td>*/}
+                            {/*    <td>31</td>*/}
+                            {/*    <td>1000</td>*/}
+                            {/*    <td>2000.20</td>*/}
+                            {/*    <td>1000.20</td>*/}
+                            {/*</tr>*/}
+                            {/*<tr>*/}
+                            {/*    <td>张三</td>*/}
+                            {/*    <td>一号线</td>*/}
+                            {/*    <td>31</td>*/}
+                            {/*    <td>1000</td>*/}
+                            {/*    <td>2000.20</td>*/}
+                            {/*    <td>1000.20</td>*/}
+                            {/*</tr>*/}
                         </tbody>
                     </table>
                 </div>

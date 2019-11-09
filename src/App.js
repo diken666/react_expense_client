@@ -2,7 +2,7 @@ import React from 'react';
 import Header from "./component/Header/Header";
 import MenuBox from "./component/MenuBox/MenuBox";
 import RightBox from "./component/RightBox/RightBox";
-import { Layout, Button, message } from 'antd';
+import { Layout } from 'antd';
 import axios from 'axios';
 
 import style from './App.module.scss';
@@ -47,7 +47,7 @@ class App extends React.Component{
             case 'login':
                 return (
                     <Layout>
-                        <Header />
+                        <Header userStateChange={this.userStateChange} />
                         <Layout>
                             <MenuBox />
                             <RightBox />
@@ -55,7 +55,7 @@ class App extends React.Component{
                     </Layout>
                 );
             default:
-                return <div>logout</div>
+                return<Login userStateChange={this.userStateChange} />;
         }
     }
     render() {
