@@ -7,13 +7,15 @@ import axios from 'axios';
 
 import style from './App.module.scss';
 import router from './router';
+import Login from './component/Login/Login';
 
 class App extends React.Component{
     constructor ( props ) {
         super(props);
         this.state = {
             userState: 'loading'
-        }
+        };
+        this.userStateChange = this.userStateChange.bind(this)
     }
     async componentDidMount(){
         let state = await this.getUserState();
@@ -25,31 +27,10 @@ class App extends React.Component{
     getUserState(){
         return axios.get(router.getUserState);
     }
-    getLoginState(id, psw){
-        return axios.post(router.getLoginState, {
-            id,
-            psw
-        })
-    }
-    async loginClick(){
-        let id = document.getElementById('id').value;
-        let psw = document.getElementById('psw').value;
-        if ( !id ){
-            message.warn('账号信息不能为空');
-            return
-        }
-        if ( !psw ){
-            message.warn('密码不能为空');
-            return
-        }
-        let data = ( await this.getLoginState(id, psw) ).data;
-        if ( data.state === 'error' ) {
-            message.warn(data.msg);
-            return
-        }
+
+    userStateChange(userState){
         this.setState({
-            loginLoading: true,
-            userState: "login"
+            userState
         })
     }
     stateRender(state){
@@ -62,26 +43,7 @@ class App extends React.Component{
                     </div>
                 );
             case 'logout':
-                return (
-                    <div className={style.logout}>
-                        <div className={style.loginBox}>
-                            <div className={style.loginTitle}>登陆</div>
-                            <form action="">
-                                <div className={style.inputItem}>
-                                    <i className={[style.icon, style.userLogin].join(" ")} />
-                                    <input id="id" className={style.input} type="text"/>
-                                </div>
-                                <div className={style.inputItem}>
-                                    <i className={[style.icon, style.password].join(" ")} />
-                                    <input id="psw" className={style.input} type="password"/>
-                                </div>
-                                <div className={style.loginBtn}>
-                                    <Button loading={this.state.loginLoading} type="primary" block size={"large"} onClick={()=>this.loginClick()} >登陆</Button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                );
+                return <Login userStateChange={this.userStateChange} />;
             case 'login':
                 return (
                     <Layout>
