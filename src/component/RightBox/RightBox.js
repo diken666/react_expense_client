@@ -37,16 +37,16 @@ export default class RightBox extends React.Component {
         for ( let i=0; i<roomData.length; i++ ) {
             if( result[roomData[i].rid] ) {
                 result[roomData[i].rid].dataArr.push({
-                    userId: roomData[i].userId,
-                    userName: roomData[i].userName,
+                    uid: roomData[i].uid,
+                    uname: roomData[i].uname,
                     class: roomData[i].class
                 })
             } else {
                 result[roomData[i].rid] = {};
                 let dataArr = [];
                 dataArr.push({
-                    userId: roomData[i].userId,
-                    userName: roomData[i].userName,
+                    uid: roomData[i].uid,
+                    uname: roomData[i].uname,
                     class: roomData[i].class
                 });
                 result[roomData[i].rid].dataArr = dataArr;
@@ -83,27 +83,85 @@ export default class RightBox extends React.Component {
                 </tr>
             )
         } else {
-            console.log(data);
-            let roomA = [];
-            let roomB = [];
-            // let data = this.state.data;
-            for ( let i=1; i<=13; i++ ) {
-                let index = i.toString()[1] ? i.toString(): "0"+i.toString()[0];
-                roomA.push({
-                    name: `A${index}`,
-                    data: data[`A${index}`].dataArr
-                });
-                // todo 注意处理B07这种无数据情况
-                console.log(`B${index}`, data[`B${index}`])
-                // roomB.push({
-                //     name: `B${index}`,
-                //     data: data[`B${index}`].dataArr
-                // });
-            }
-            console.log(roomA);
-            console.log(roomB);
+            let resData = this.objToArr(data);
+            console.log(resData);
+            let res = [];
+            resData.forEach((item)=>{
+                if ( item.data.length !== 0 ) {
+                    for ( let i=0; i<item.data.length; i++ ) {
+                        let key = 'key' + Math.random().toString().slice(2);
+                        if ( i === 0 ) {
+                            res.push((
+                                <tr key={key}>
+                                    <td rowSpan={item.data.length} title={"房间号"}>{item.name}</td>
+                                    <td rowSpan={item.data.length} title={"上期水表数和本期水表数"} className={style.pointer} onClick={()=> this.click()}>11302 <br/> 11220 </td>
+                                    <td rowSpan={item.data.length} title={"上期电表数和本期电表数"}>8000 <br/> 9000</td>
+                                    <td rowSpan={item.data.length} title={"本期用电和本期用水"}>22 <br/> 110</td>
+                                    <td title={"住户名"}>{ item.data[i] ? item.data[i].uname: '' }</td>
+                                    <td title={"部门"}>{ item.data[i] ? item.data[i].class: '' }</td>
+                                    <td title={"住宿天数"}>31</td>
+                                    <td title={"个人水费"}>1000</td>
+                                    <td title={"个人电费"}>2000.20</td>
+                                    <td title={"个人总费用"}>1000.20</td>
+                                </tr>
+
+                            ))
+                        } else {
+                            res.push((
+                                <tr key={key}>
+                                    <td title={"住户名"}>{ item.data[i] ? item.data[i].uname: '' }</td>
+                                    <td title={"部门"}>{ item.data[i] ? item.data[i].class: '' }</td>
+                                    <td title={"住宿天数"}>31</td>
+                                    <td title={"个人水费"}>1000</td>
+                                    <td title={"个人电费"}>2000.20</td>
+                                    <td title={"个人总费用"}>1000.20</td>
+                                </tr>
+
+                            ))
+                        }
+                    }
+                } else {
+                    let key = 'key' + Math.random().toString().slice(2);
+                    res.push((
+                        <tr key={key}>
+                            <td title={"房间号"}>{item.name}</td>
+                            <td title={"上期水表数和本期水表数"} className={style.pointer} onClick={()=> this.click()}>11302 <br/> 11220 </td>
+                            <td title={"上期电表数和本期电表数"}>8000 <br/> 9000</td>
+                            <td title={"本期用电和本期用水"}>22 <br/> 110</td>
+                            <td title={"住户名"}>{ '' }</td>
+                            <td title={"部门"}>{ '' }</td>
+                            <td title={"住宿天数"}> </td>
+                            <td title={"个人水费"}> </td>
+                            <td title={"个人电费"}> </td>
+                            <td title={"个人总费用"}> </td>
+                        </tr>
+
+                    ))
+                }
+
+                console.log(item);
+
+            });
+            return res;
         }
     }
+
+    objToArr(data) {
+        let roomA = [];
+        let roomB = [];
+        for ( let i=1; i<=13; i++ ) {
+            let index = i.toString()[1] ? i.toString(): "0"+i.toString()[0];
+            data[`A${index}`] ?
+                roomA.push({ name: `A${index}`, data: data[`A${index}`].dataArr })
+                : roomA.push({ name: `A${index}`, data: [] });
+
+            data[`B${index}`] ?
+                roomB.push({ name: `B${index}`, data: data[`B${index}`].dataArr })
+                : roomB.push({ name: `B${index}`, data: [] })
+        }
+        return [...roomA, ...roomB];
+    }
+
     render() {
         return (
             <Content className={style.rightBox}>
@@ -124,31 +182,9 @@ export default class RightBox extends React.Component {
                             </tr>
                         </thead>
                         <tbody>
-
                         {
                             this.tableRender(this.state.data)
                         }
-
-                            {/*<tr>*/}
-                            {/*    <td rowSpan="2">A01</td>*/}
-                            {/*    <td rowSpan="2" className={style.pointer} onClick={()=> this.click()}>11302 <br/> 11220 </td>*/}
-                            {/*    <td rowSpan="2">8000 <br/> 9000</td>*/}
-                            {/*    <td rowSpan="2">22 <br/> 110</td>*/}
-                            {/*    <td>张三</td>*/}
-                            {/*    <td>一号线</td>*/}
-                            {/*    <td>31</td>*/}
-                            {/*    <td>1000</td>*/}
-                            {/*    <td>2000.20</td>*/}
-                            {/*    <td>1000.20</td>*/}
-                            {/*</tr>*/}
-                            {/*<tr>*/}
-                            {/*    <td>张三</td>*/}
-                            {/*    <td>一号线</td>*/}
-                            {/*    <td>31</td>*/}
-                            {/*    <td>1000</td>*/}
-                            {/*    <td>2000.20</td>*/}
-                            {/*    <td>1000.20</td>*/}
-                            {/*</tr>*/}
                         </tbody>
                     </table>
                 </div>
@@ -160,10 +196,10 @@ export default class RightBox extends React.Component {
                     okText={"确认"}
                     cancelText={"取消"}
                 >
-                    <Input addonBefore="本期水表数" defaultValue="123" />
+                    <Input addonBefore="上期水表数" addonAfter="吨" defaultValue="123" disabled />
                     <br/>
                     <br/>
-                    <Input addonBefore="本期电表数" defaultValue="123" />
+                    <Input addonBefore="本期水表数" addonAfter="吨" defaultValue="123" />
                 </Modal>
             </Content>
         )
