@@ -15,6 +15,13 @@
   background: #aaa;
 }
 
+.ctnBox {
+  display: flex;
+  height: 100px;
+  justify-content: center;
+  align-items: center;
+}
+
 table.gridtable {
   font-family: verdana,arial,sans-serif;
   font-size:11px;

@@ -1,12 +1,16 @@
 import React from 'react';
 import style from './Table.module.scss';
-import {Input, message, Modal} from "antd";
+import {Input, message, Modal, DatePicker, LocaleProvider } from "antd";
+import zh_CN from 'antd/lib/locale-provider/zh_CN';
+
+const { RangePicker } = DatePicker;
 
 export default class Table extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             visible: false,
+            dateVisible: false,
             recordData: [],
             roomData: [],
             nowRoomData: {},
@@ -101,9 +105,21 @@ export default class Table extends React.Component {
                                     <div className={style.line}/>
                                     {this.state.nowRoomData[item.name].nowElecSpd ? this.state.nowRoomData[item.name].nowElecSpd: ''}
                                 </td>
+                                <td
+                                    rowSpan={item.data.length}
+                                    title={"本期用电和本期用水"}
+                                >
+
+                                </td>
                                 <td title={"住户名"}>{ item.data[i] ? item.data[i].uname: '' }</td>
                                 <td title={"部门"}>{ item.data[i] ? item.data[i].class: '' }</td>
-                                <td title={"住宿天数"}>31</td>
+                                <td
+                                    className={style.pointer}
+                                    title={"住宿天数"}
+                                    onClick={()=>this.dateSelect()}
+                                >
+                                    31
+                                </td>
                                 <td title={"个人水费"}>1000</td>
                                 <td title={"个人电费"}>2000.20</td>
                                 <td title={"个人总费用"}>1000.20</td>
@@ -115,7 +131,11 @@ export default class Table extends React.Component {
                             <tr key={key}>
                                 <td title={"住户名"}>{ item.data[i] ? item.data[i].uname: '' }</td>
                                 <td title={"部门"}>{ item.data[i] ? item.data[i].class: '' }</td>
-                                <td title={"住宿天数"}>31</td>
+                                <td
+                                    className={style.pointer}
+                                    title={"住宿天数"}
+                                    onClick={()=>this.dateSelect()}
+                                >31</td>
                                 <td title={"个人水费"}>1000</td>
                                 <td title={"个人电费"}>2000.20</td>
                                 <td title={"个人总费用"}>1000.20</td>
@@ -179,6 +199,12 @@ export default class Table extends React.Component {
         })
     }
 
+    dateSelect() {
+        this.setState({
+            dateVisible: true
+        })
+    }
+
 
     handleOk(){
         let lastDataShow = this.state.lastDataShow;
@@ -223,6 +249,21 @@ export default class Table extends React.Component {
             visible: false
         })
     }
+    dateOk() {
+        this.setState({
+            dateVisible: false
+        })
+    }
+    dateCancel() {
+        this.setState({
+            dateVisible: false
+        })
+    }
+
+    disabledDate(current){
+        // 不能选今天和今天之前的日期
+        return current > Date.now();
+    };
 
     render() {
         return (
@@ -234,6 +275,7 @@ export default class Table extends React.Component {
                         <th>本期水表数 <br/> 上期水表数</th>
                         <th>本期电表数 <br/> 上期电表数</th>
                         <th>本期用水(吨) <br/> 本期用电(度)</th>
+                        <th>本期水费(元) <br/> 本期电费(元)</th>
                         <th>姓名</th>
                         <th>部门</th>
                         <th>住宿天数</th>
@@ -277,9 +319,26 @@ export default class Table extends React.Component {
                         </Modal>
                         : ''
                 }
-
+                {
+                    this.state.dateVisible ?
+                        <Modal
+                            title={"输入住宿开始和结束时间"}
+                            visible={true}
+                            onOk={()=>this.dateOk()}
+                            onCancel={()=>this.dateCancel()}
+                            okText={"确认"}
+                            cancelText={"取消"}
+                            centered
+                        >
+                            <div className={style.ctnBox}>
+                                <LocaleProvider locale={zh_CN}>
+                                    <RangePicker disabledDate={(current)=>this.disabledDate(current)} />
+                                </LocaleProvider>
+                            </div>
+                        </Modal>
+                        : ''
+                }
             </div>
-
         )
     }
 }
