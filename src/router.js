@@ -1,5 +1,5 @@
 
-const url = "http://localhost:3300";
+const url = "http://localhost:3100";
 
 export default {
     getUserState: url + "/getuserstate",

@@ -58,6 +58,8 @@ export default class RightBox extends React.Component {
             }
         }
         let recordData = await this.getRecentRecord();
+        console.log(this.arrToObj(recordData));
+        console.log(this.objToArr(result));
         this.setState({
             recordData: this.arrToObj(recordData),
             roomData: this.objToArr(result),

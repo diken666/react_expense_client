@@ -2,6 +2,9 @@ import React from 'react';
 import style from './Table.module.scss';
 import {Input, message, Modal, DatePicker, LocaleProvider } from "antd";
 import zh_CN from 'antd/lib/locale-provider/zh_CN';
+import moment from 'moment';
+import 'moment/locale/zh-cn';
+moment.locale('zh-cn');
 
 const { RangePicker } = DatePicker;
 
@@ -11,13 +14,17 @@ export default class Table extends React.Component {
         this.state = {
             visible: false,
             dateVisible: false,
+            configBoxVisible: false,
             recordData: [],
             roomData: [],
             nowRoomData: {},
             nowRoom: '',
             nowType: '',
             lastDataShow: 0,
-            nowDataShow: 0
+            nowDataShow: 0,
+            waterPrice: 6.12,
+            elecPrice: 1.00,
+            endDate: moment(Date.now()).format('YYYY-MM-DD')
         }
     }
 
@@ -39,6 +46,8 @@ export default class Table extends React.Component {
                 elec: null,
                 nowWaterSpd: null,
                 nowElecSpd: null,
+                nowWaterCost: null,
+                nowElecCost: null,
                 userData: []
             };
             res[`B${index}`] = {
@@ -46,6 +55,8 @@ export default class Table extends React.Component {
                 elec: null,
                 nowWaterSpd: null,
                 nowElecSpd: null,
+                nowWaterCost: null,
+                nowElecCost: null,
                 userData: []
             }
         }
@@ -98,18 +109,25 @@ export default class Table extends React.Component {
                                 </td>
                                 <td
                                     rowSpan={item.data.length}
-                                    title={"本期用电和本期用水"}
+                                    title={"本期用水和本期用电"}
                                     onClick={()=>this.cannotEditor()}
                                 >
-                                    {this.state.nowRoomData[item.name].nowWaterSpd ? this.state.nowRoomData[item.name].nowWaterSpd: ''}
+                                    {this.state.nowRoomData[item.name].nowWaterSpd !== null ? this.state.nowRoomData[item.name].nowWaterSpd: ''}
                                     <div className={style.line}/>
-                                    {this.state.nowRoomData[item.name].nowElecSpd ? this.state.nowRoomData[item.name].nowElecSpd: ''}
+                                    {this.state.nowRoomData[item.name].nowElecSpd !== null ? this.state.nowRoomData[item.name].nowElecSpd: ''}
                                 </td>
                                 <td
                                     rowSpan={item.data.length}
-                                    title={"本期用电和本期用水"}
+                                    title={"本期水费和本期电费"}
+                                    onClick={()=>this.cannotEditor()}
                                 >
-
+                                    {this.state.nowRoomData[item.name].nowWaterSpd !== null ?
+                                        this.state.nowRoomData[item.name].nowWaterSpd * this.state.waterPrice
+                                        : ''}
+                                    <div className={style.line}/>
+                                    {this.state.nowRoomData[item.name].nowElecSpd !== null ?
+                                        this.state.nowRoomData[item.name].nowElecSpd * this.state.elecPrice
+                                        : ''}
                                 </td>
                                 <td title={"住户名"}>{ item.data[i] ? item.data[i].uname: '' }</td>
                                 <td title={"部门"}>{ item.data[i] ? item.data[i].class: '' }</td>
@@ -164,9 +182,18 @@ export default class Table extends React.Component {
                             }
                         </td>
                         <td title={"本期用电和本期用水"} onClick={()=>this.cannotEditor()}>
-                            {this.state.nowRoomData[item.name].nowWaterSpd ? this.state.nowRoomData[item.name].nowWaterSpd: ''}
+                            {this.state.nowRoomData[item.name].nowWaterSpd !== null ? this.state.nowRoomData[item.name].nowWaterSpd: ''}
                             <div className={style.line}/>
-                            {this.state.nowRoomData[item.name].nowElecSpd ? this.state.nowRoomData[item.name].nowElecSpd: ''}
+                            {this.state.nowRoomData[item.name].nowElecSpd !== null ? this.state.nowRoomData[item.name].nowElecSpd: ''}
+                        </td>
+                        <td title={"本期水费和本期电费"} onClick={()=>this.cannotEditor()}>
+                            {this.state.nowRoomData[item.name].nowWaterSpd !== null ?
+                                this.state.nowRoomData[item.name].nowWaterSpd * this.state.waterPrice
+                                : ''}
+                            <div className={style.line}/>
+                            {this.state.nowRoomData[item.name].nowElecSpd !== null ?
+                                this.state.nowRoomData[item.name].nowElecSpd * this.state.elecPrice
+                                : ''}
                         </td>
                         <td title={"住户名"}>{ '' }</td>
                         <td title={"部门"}>{ '' }</td>
@@ -196,7 +223,7 @@ export default class Table extends React.Component {
         let value =  isNaN( parseInt(event.target.value) ) ? 0 : parseInt(event.target.value);
         this.setState({
             nowDataShow: value
-        })
+        });
     }
 
     dateSelect() {
@@ -259,15 +286,58 @@ export default class Table extends React.Component {
             dateVisible: false
         })
     }
-
+    configBoxOk(){
+        this.setState({
+            configBoxVisible: false
+        })
+    }
+    configBoxCancel(){
+        this.setState({
+            configBoxVisible: false
+        })
+    }
     disabledDate(current){
-        // 不能选今天和今天之前的日期
+        // 不能选今天之后的日期
         return current > Date.now();
     };
+
+    // 回车键结束输入
+    inputEnter(event) {
+        if ( event.keyCode === 13 ) {
+            this.handleOk()
+        }
+    }
+
+    // 设置按钮点击事件
+    setClick() {
+        this.setState({
+            configBoxVisible: true
+        })
+    }
+
+    // 截止时间变化时
+    endTimeChange(e){
+        console.log(e.format('YYYY-MM-DD'));
+        console.log(moment(Date.now()).format('YYYY-MM-DD'))
+        this.setState({
+            endDate: e.format('YYYY-MM-DD')
+        })
+    }
 
     render() {
         return (
             <div>
+                <div className={style.title}>
+                    <span>2019-10-27</span>
+                    至
+                    <span>{this.state.endDate}</span>
+                    水电统计
+                    <i className={style.icon} title={"设置"} onClick={()=>this.setClick()} />
+                </div>
+                <div className={style.des}>
+                    <span className={style.desItem}>水费单价：{this.state.waterPrice} 元/吨</span>
+                    <span className={style.desItem}>电费单价：{this.state.elecPrice} 元/度</span>
+                </div>
                 <table className={style.gridtable}>
                     <thead>
                     <tr>
@@ -313,8 +383,9 @@ export default class Table extends React.Component {
                                 addonBefore={this.state.nowType === "elec" ? "本期电表数":"本期水表数"}
                                 addonAfter={this.state.nowType === "elec" ? "度" : "吨"}
                                 type={"number"}
-                                defaultValue={this.state.nowDataShow}
                                 onChange={(event)=>this.nowDataChange(event)}
+                                onKeyUp={(event)=>this.inputEnter(event)}
+                                autoFocus={true}
                             />
                         </Modal>
                         : ''
@@ -334,6 +405,62 @@ export default class Table extends React.Component {
                                 <LocaleProvider locale={zh_CN}>
                                     <RangePicker disabledDate={(current)=>this.disabledDate(current)} />
                                 </LocaleProvider>
+                            </div>
+                        </Modal>
+                        : ''
+                }
+                {
+                    this.state.configBoxVisible ?
+                        <Modal
+                            title={"设置"}
+                            visible={true}
+                            onOk={()=>this.configBoxOk()}
+                            onCancel={()=>this.configBoxCancel()}
+                            okText={"确认"}
+                            cancelText={"取消"}
+                            centered
+                        >
+                            <div className={style.item}>
+                                <span>开始时间：</span>
+                                <LocaleProvider locale={zh_CN}>
+                                    <DatePicker disabled value={moment('2019-10-27')}/>
+                                </LocaleProvider>
+                            </div>
+                            <div className={style.item}>
+                                <span>截止时间：</span>
+                                <LocaleProvider locale={zh_CN}>
+                                    <DatePicker
+                                        defaultValue={moment(this.state.endDate)}
+                                        disabledDate={(current)=>this.disabledDate(current)}
+                                        onChange={(e)=>this.endTimeChange(e)}
+                                    />
+                                </LocaleProvider>
+                            </div>
+                            <div className={style.item}>
+                                <span>水费单价：</span>
+                                <div className={style.itemRight}>
+                                    <Input
+                                        id={"waterPrice"}
+                                        addonAfter={"元/吨"}
+                                        type={"number"}
+                                        onChange={(event)=>this.nowDataChange(event)}
+                                        onKeyUp={(event)=>this.inputEnter(event)}
+                                        defaultValue={this.state.waterPrice}
+                                    />
+                                </div>
+                            </div>
+                            <div className={style.item}>
+                                <span>电费单价：</span>
+                                <div className={style.itemRight}>
+                                    <Input
+                                        id={"elecPrice"}
+                                        addonAfter={"元/度"}
+                                        type={"number"}
+                                        onChange={(event)=>this.nowDataChange(event)}
+                                        onKeyUp={(event)=>this.inputEnter(event)}
+                                        defaultValue={this.state.elecPrice}
+                                    />
+                                </div>
                             </div>
                         </Modal>
                         : ''
