@@ -1,6 +1,6 @@
 import React from 'react';
 import style from './Table.module.scss';
-import {Input, message, Modal, DatePicker, LocaleProvider } from "antd";
+import {Input, message, Modal, DatePicker, ConfigProvider } from "antd";
 import zh_CN from 'antd/lib/locale-provider/zh_CN';
 import moment from 'moment';
 import 'moment/locale/zh-cn';
@@ -317,21 +317,37 @@ export default class Table extends React.Component {
 
     // 截止时间变化时
     endTimeChange(e){
-        console.log(e.format('YYYY-MM-DD'));
-        console.log(moment(Date.now()).format('YYYY-MM-DD'))
+        let date = e ? e.format('YYYY-MM-DD') : moment(Date.now()).format('YYYY-MM-DD');
+        // console.log(date);
+        // console.log(moment(Date.now()).format('YYYY-MM-DD'))
         this.setState({
-            endDate: e.format('YYYY-MM-DD')
+            endDate: date
         })
     }
+
+    // 当水的单价变化时
+    waterPriceChange(e) {
+        let price = e.target.value ? parseFloat(e.target.value) : 6.12;
+        this.setState({
+            waterPrice: price
+        })
+    }
+
+    // 当电的单价变化时
+    elecPriceChange(e) {
+        let price = e.target.value ? parseFloat(e.target.value) : 6.12;
+        this.setState({
+            elecPrice: price
+        })
+    }
+
+
 
     render() {
         return (
             <div>
                 <div className={style.title}>
-                    <span>2019-10-27</span>
-                    至
-                    <span>{this.state.endDate}</span>
-                    水电统计
+                    <span>2019-10-27</span>至<span>{this.state.endDate}</span>水电统计
                     <i className={style.icon} title={"设置"} onClick={()=>this.setClick()} />
                 </div>
                 <div className={style.des}>
@@ -402,9 +418,9 @@ export default class Table extends React.Component {
                             centered
                         >
                             <div className={style.ctnBox}>
-                                <LocaleProvider locale={zh_CN}>
+                                <ConfigProvider locale={zh_CN}>
                                     <RangePicker disabledDate={(current)=>this.disabledDate(current)} />
-                                </LocaleProvider>
+                                </ConfigProvider>
                             </div>
                         </Modal>
                         : ''
@@ -422,19 +438,19 @@ export default class Table extends React.Component {
                         >
                             <div className={style.item}>
                                 <span>开始时间：</span>
-                                <LocaleProvider locale={zh_CN}>
+                                <ConfigProvider locale={zh_CN}>
                                     <DatePicker disabled value={moment('2019-10-27')}/>
-                                </LocaleProvider>
+                                </ConfigProvider>
                             </div>
                             <div className={style.item}>
                                 <span>截止时间：</span>
-                                <LocaleProvider locale={zh_CN}>
+                                <ConfigProvider locale={zh_CN}>
                                     <DatePicker
                                         defaultValue={moment(this.state.endDate)}
                                         disabledDate={(current)=>this.disabledDate(current)}
                                         onChange={(e)=>this.endTimeChange(e)}
                                     />
-                                </LocaleProvider>
+                                </ConfigProvider>
                             </div>
                             <div className={style.item}>
                                 <span>水费单价：</span>
@@ -443,8 +459,7 @@ export default class Table extends React.Component {
                                         id={"waterPrice"}
                                         addonAfter={"元/吨"}
                                         type={"number"}
-                                        onChange={(event)=>this.nowDataChange(event)}
-                                        onKeyUp={(event)=>this.inputEnter(event)}
+                                        onChange={(event)=>this.waterPriceChange(event)}
                                         defaultValue={this.state.waterPrice}
                                     />
                                 </div>
@@ -456,8 +471,7 @@ export default class Table extends React.Component {
                                         id={"elecPrice"}
                                         addonAfter={"元/度"}
                                         type={"number"}
-                                        onChange={(event)=>this.nowDataChange(event)}
-                                        onKeyUp={(event)=>this.inputEnter(event)}
+                                        onChange={(event)=>this.elecPriceChange(event)}
                                         defaultValue={this.state.elecPrice}
                                     />
                                 </div>
