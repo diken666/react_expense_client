@@ -1,4 +1,6 @@
-
+.container{
+  position: relative;
+}
 .pointer{
   cursor: pointer;
 }
@@ -76,35 +78,47 @@
   justify-content: center;
   align-items: center;
   margin: auto;
-  width: 200px;
-  height: 200px;
+  width: 4px;
+  height: 4px;
   opacity: 0.5;
 }
 
 .circle {
   position: absolute;
   top: 0;
-  width: 200px;
-  height: 200px;
-  background-color: greenyellow;
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
 }
 
 .circle:first-child {
   animation: circle-opacity 2s infinite;
   animation-delay: .3s;
+  background: #009966;
 }
 
 .circle:nth-child(2) {
   animation: circle-opacity 2s infinite;
   animation-delay: .6s;
+  background: #FFFF66;
 }
 
 .circle:nth-child(3) {
   animation: circle-opacity 2s infinite;
   animation-delay: .9s;
+  background: #FF6600;
 }
-
+@keyframes circle-opacity {
+  0% {
+    transform: scale(1);
+  }
+  50%{
+    transform: scale(4);
+  }
+  100%{
+    transform: scale(1);
+  }
+}
 
 
 table.gridtable {

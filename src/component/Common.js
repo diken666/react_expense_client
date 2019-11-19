@@ -15,6 +15,6 @@ export default class Common{
     static dateCalculate(start, end) {
         let startTime = (new Date(start)).getTime();
         let endTime = (new Date(end)).getTime() + 1000 * 60 * 60 * 24;   // 包括结束当天
-        return ((endTime - startTime) / 1000 / 60 / 60 / 24).toFixed(0);
+        return Math.ceil((endTime - startTime) / 1000 / 60 / 60 / 24);
     }
 }

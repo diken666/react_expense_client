@@ -1,10 +1,8 @@
 import React from 'react';
 import style from './RightBox.module.scss';
-import { Layout, message } from 'antd';
-import axios from 'axios';
+import { Layout } from 'antd';
 import router from "../../router";
 import Table from "../Table/Table";
-import moment from 'moment';
 import Common from "../Common";
 const { Content } = Layout;
 

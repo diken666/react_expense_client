@@ -2,11 +2,10 @@ import React from 'react';
 import style from './Table.module.scss';
 import {Input, message, Modal, DatePicker, ConfigProvider } from "antd";
 import zh_CN from 'antd/lib/locale-provider/zh_CN';
-import moment from 'moment';
+import moment, {now} from 'moment';
 import 'moment/locale/zh-cn';
 import router from "../../router";
 import Common from "../Common";
-import axios from "axios";
 moment.locale('zh-cn');
 
 const { RangePicker } = DatePicker;
@@ -25,6 +24,7 @@ export default class Table extends React.Component {
             nowType: '',
             nowU: '',      // 当前操作用户的名字
             userRecord: {},  // 用户的信息
+            targetStartAndEndDate: [],
             lastDataShow: 0,
             nowDataShow: 0,
             waterPrice: 6.12,
@@ -61,14 +61,15 @@ export default class Table extends React.Component {
         let startDate = dateTemp.length === 1 ? dateTemp[0].date : moment(Date.now()).format('YYYY-MM-DD');
         let temp = {};
         for ( let i=0; i<data.length; i++ ) {
-            console.log(data[i]);
             temp[data[i].uname] = {
                 uid: data[i].uid,
                 rid: data[i].rid,
                 waterSpd: null,
                 elecSpd: null,
                 totalSpd: null,
-                days: Common.dateCalculate(startDate, this.state.endDate)
+                days: Common.dateCalculate(startDate, this.state.endDate),
+                startDate,
+                endDate: this.state.endDate
             }
         }
         this.setState({
@@ -174,26 +175,26 @@ export default class Table extends React.Component {
                                 <td
                                     className={style.pointer}
                                     title={"住宿天数"}
-                                    onClick={()=>this.dateSelect(item.data[i].uname, item.data[i].uid)}
+                                    onClick={()=>this.dateSelect(item.data[i].uname)}
                                 >
                                     {
                                         this.state.userRecord[item.data[i].uname] ?
                                             this.state.userRecord[item.data[i].uname].days : this.state.defaultDays
                                     }
                                 </td>
-                                <td title={"个人水费"}>
+                                <td title={"个人水费"} onClick={()=>this.cannotEditor()}>
                                     {
                                         this.state.userRecord[item.data[i].uname] ?
                                             this.state.userRecord[item.data[i].uname].waterSpd : ''
                                     }
                                 </td>
-                                <td title={"个人电费"}>
+                                <td title={"个人电费"} onClick={()=>this.cannotEditor()}>
                                     {
                                         this.state.userRecord[item.data[i].uname] ?
                                             this.state.userRecord[item.data[i].uname].elecSpd : ''
                                     }
                                 </td>
-                                <td title={"个人总费用"}>
+                                <td title={"个人总费用"} onClick={()=>this.cannotEditor()}>
                                     {
                                         this.state.userRecord[item.data[i].uname] ?
                                             this.state.userRecord[item.data[i].uname].totalSpd : ''
@@ -210,26 +211,26 @@ export default class Table extends React.Component {
                                 <td
                                     className={style.pointer}
                                     title={"住宿天数"}
-                                    onClick={()=>this.dateSelect(item.data[i].uname, item.data[i].uid)}
+                                    onClick={()=>this.dateSelect(item.data[i].uname)}
                                 >
                                     {
                                         this.state.userRecord[item.data[i].uname] ?
                                             this.state.userRecord[item.data[i].uname].days : this.state.defaultDays
                                     }
                                 </td>
-                                <td title={"个人水费"}>
+                                <td title={"个人水费"} onClick={()=>this.cannotEditor()}>
                                     {
                                         this.state.userRecord[item.data[i].uname] ?
                                             this.state.userRecord[item.data[i].uname].waterSpd : ''
                                     }
                                 </td>
-                                <td title={"个人电费"}>
+                                <td title={"个人电费"} onClick={()=>this.cannotEditor()}>
                                     {
                                         this.state.userRecord[item.data[i].uname] ?
                                             this.state.userRecord[item.data[i].uname].elecSpd : ''
                                     }
                                 </td>
-                                <td title={"个人总费用"}>
+                                <td title={"个人总费用"} onClick={()=>this.cannotEditor()}>
                                     {
                                         this.state.userRecord[item.data[i].uname] ?
                                             this.state.userRecord[item.data[i].uname].totalSpd : ''
@@ -276,9 +277,9 @@ export default class Table extends React.Component {
                         <td title={"住户名"}>{ '' }</td>
                         <td title={"部门"}>{ '' }</td>
                         <td title={"住宿天数"}> </td>
-                        <td title={"个人水费"}> </td>
-                        <td title={"个人电费"}> </td>
-                        <td title={"个人总费用"}> </td>
+                        <td title={"个人水费"} onClick={()=>this.cannotEditor()}> </td>
+                        <td title={"个人电费"} onClick={()=>this.cannotEditor()}> </td>
+                        <td title={"个人总费用"} onClick={()=>this.cannotEditor()}> </td>
                     </tr>
 
                 ))
@@ -304,26 +305,48 @@ export default class Table extends React.Component {
         });
     }
 
-    dateSelect(name, uid) {
-        // console.log(name, uid);
-        // let temp = {...this.state.userRecord};
-        // temp[name] = {
-        //     days:
-        // };
+    dateSelect(name) {
         this.setState({
             dateVisible: true,
-            // userRecord: temp,
             nowU: name
         })
     }
 
     userDaysChange(e) {
-        let days = Common.dateCalculate(e[0].format('YYYY-MM-DD'), e[1].format('YYYY-MM-DD') );
-        let tempUserRecord = { ...this.state.userRecord };
-        tempUserRecord[this.state.nowU].days = days;
         this.setState({
-            userRecord: tempUserRecord
+            targetStartAndEndDate: e
         });
+    }
+
+    calculateSpd(type, userList, roomData) {
+        let totalDays = 0;
+        let perPrice = 0;
+        let userRecord = {...this.state.userRecord};
+        for ( let i=0; i<userList.length; i++ ) {
+            totalDays += userRecord[userList[i]].days;
+        }
+        if ( type === 'water' ) {
+            perPrice = roomData['nowWaterSpd'] * this.state.waterPrice / totalDays;
+            for ( let i=0; i<userList.length; i++ ) {
+                let waterSpd = userRecord[userList[i]].days * perPrice;
+                userRecord[userList[i]].waterSpd = waterSpd.toFixed(3);
+                if (userRecord[userList[i]].elecSpd) {
+                    userRecord[userList[i]].totalSpd = (parseFloat(userRecord[userList[i]].elecSpd) + waterSpd).toFixed(3);
+                }
+            }
+        } else if (type === 'elec') {
+            perPrice = roomData['nowElecSpd'] * this.state.elecPrice / totalDays;
+            for ( let i=0; i<userList.length; i++ ) {
+                let elecSpd = userRecord[userList[i]].days * perPrice;
+                userRecord[userList[i]].elecSpd = elecSpd.toFixed(3);
+                if (userRecord[userList[i]].waterSpd) {
+                    userRecord[userList[i]].totalSpd = (parseFloat(userRecord[userList[i]].waterSpd) + elecSpd).toFixed(3);
+                }
+            }
+        }
+        this.setState({
+            userRecord
+        })
     }
 
 
@@ -340,16 +363,23 @@ export default class Table extends React.Component {
             console.log(tempNowRoomData);
             console.log(roomData);
             console.log(this.props.recordData);
-            for ( let i=0; i<roomData.length; i++ ) {
-                if ( nowRoom === roomData[i].name ) {
-
-                }
-            }
 
             if ( nowType === 'water' ) {
                 tempNowRoomData[nowRoom]['nowWaterSpd'] = nowDataShow - this.props.recordData[nowRoom].water;
             } else if ( nowType === 'elec') {
                 tempNowRoomData[nowRoom]['nowElecSpd'] = nowDataShow - this.props.recordData[nowRoom].elec;
+            }
+
+            for ( let i=0; i<roomData.length; i++ ) {
+                if ( nowRoom === roomData[i].name ) {
+                    let userList = [];
+                    for ( let j=0; j<roomData[i].data.length; j++ ) {
+                        userList.push(roomData[i].data[j].uname)
+                    }
+                    this.calculateSpd(nowType, userList, tempNowRoomData[nowRoom]);
+                    console.log(nowType);
+                    break;
+                }
             }
             this.setState({
                 visible: false,
@@ -367,7 +397,17 @@ export default class Table extends React.Component {
         })
     }
     dateOk() {
+        let target = this.state.targetStartAndEndDate;
+        let days = 0;
+        if(target.length === 2) {
+            days = Common.dateCalculate(target[0].format('YYYY-MM-DD'), target[1].format('YYYY-MM-DD') );
+        }
+        let tempUserRecord = { ...this.state.userRecord };
+        tempUserRecord[this.state.nowU].days = days;
+        tempUserRecord[this.state.nowU].startDate = target[0].format('YYYY-MM-DD');
+        tempUserRecord[this.state.nowU].endDate = target[1].format('YYYY-MM-DD');
         this.setState({
+            userRecord: tempUserRecord,
             dateVisible: false
         })
     }
@@ -377,7 +417,15 @@ export default class Table extends React.Component {
         })
     }
     configBoxOk(){
+        let date = this.state.tempEndDate;
+        let keys = Object.keys(this.state.userRecord);
+        let tempUserRecord = { ...this.state.userRecord  };
+        for ( let i=0; i<keys.length; i++ ) {
+            tempUserRecord[keys[i]].days = Common.dateCalculate(this.state.startDate, date);
+        }
         this.setState({
+            endDate: date,
+            userRecord: tempUserRecord,
             configBoxVisible: false
         })
     }
@@ -410,7 +458,7 @@ export default class Table extends React.Component {
     endTimeChange(e){
         let date = e ? e.format('YYYY-MM-DD') : moment(Date.now()).format('YYYY-MM-DD');
         this.setState({
-            endDate: date
+            tempEndDate: date
         })
     }
 
@@ -430,13 +478,16 @@ export default class Table extends React.Component {
         })
     }
 
-    tableClick() {
-        console.log("!23")
+    tableClick(e) {
+        let x = e.clientX - 2;
+        let y = e.clientY - 2;
+        document.querySelector('.'+style.buttonWrap).style.top = y+'px';
+        document.querySelector('.'+style.buttonWrap).style.left = x+'px';
     }
 
     render() {
         return (
-            <div>
+            <div className={style.container}>
                 <div className={style.title}>
                     <span>2019-10-27</span>至<span>{this.state.endDate}</span>水电统计
                     <i className={style.icon} title={"设置"} onClick={()=>this.setClick()} />
@@ -445,7 +496,7 @@ export default class Table extends React.Component {
                     <span className={style.desItem}>水费单价：{this.state.waterPrice} 元/吨</span>
                     <span className={style.desItem}>电费单价：{this.state.elecPrice} 元/度</span>
                 </div>
-                <table className={style.gridtable} onClick={()=>this.tableClick()}>
+                <table className={style.gridtable} onClick={(e)=>this.tableClick(e)}>
                     <thead>
                     <tr>
                         <th>房间号</th>
@@ -517,7 +568,11 @@ export default class Table extends React.Component {
                                 <ConfigProvider locale={zh_CN}>
                                     <RangePicker
                                         disabledDate={(current)=>this.disabledDate(current)}
-                                        defaultValue={[moment(this.state.startDate), moment()]}
+                                        defaultValue={
+                                            [
+                                                moment(this.state.userRecord[this.state.nowU].startDate),
+                                                moment(this.state.userRecord[this.state.nowU].endDate)
+                                            ]}
                                         onChange={(e)=>this.userDaysChange(e)}
                                     />
                                 </ConfigProvider>
