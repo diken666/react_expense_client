@@ -467,8 +467,11 @@ export default class Table extends React.Component {
                     }
                     </tbody>
                 </table>
-                {/*todo 波纹特效*/}
-                {/*<div className={}></div>*/}
+                <section className={style.buttonWrap}>
+                    <div className={style.circle}/>
+                    <div className={style.circle}/>
+                    <div className={style.circle}/>
+                </section>
                 {
                     this.state.visible ?
                         <Modal
