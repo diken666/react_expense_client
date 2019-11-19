@@ -4,14 +4,16 @@ import { Layout, message } from 'antd';
 import axios from 'axios';
 import router from "../../router";
 import Table from "../Table/Table";
+import moment from 'moment';
+import Common from "../Common";
 const { Content } = Layout;
 
 export default class RightBox extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            recordData: [],
-            roomData: [],
+            recordData: {},
+            roomData: []
         };
         this.dataInit = this.dataInit.bind(this);
     }
@@ -19,21 +21,12 @@ export default class RightBox extends React.Component {
         this.dataInit().then();
     }
 
-    async getAsyncData(url) {
-        let state = (await axios.get(url)).data.state || 'error';
-        let msg = (await axios.get(url)).data.msg || '获取信息失败';
-        let data = (await axios.get(url)).data.data || [];
-        if ( state === 'error' ) {
-            message.warn(msg)
-        }
-        return data
+    async getRoomInfo() {
+        return await Common.getAsyncData(router.getRoomInfo)
     }
 
-    async getRoomInfo() {
-        return await this.getAsyncData(router.getRoomInfo)
-    }
     async getRecentRecord() {
-        return await this.getAsyncData(router.getRecentRecord)
+        return await Common.getAsyncData(router.getRecentRecord)
     }
 
     async dataInit(){
@@ -62,8 +55,7 @@ export default class RightBox extends React.Component {
         console.log(this.objToArr(result));
         this.setState({
             recordData: this.arrToObj(recordData),
-            roomData: this.objToArr(result),
-
+            roomData: this.objToArr(result)
         })
     }
 

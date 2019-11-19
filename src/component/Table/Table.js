@@ -4,6 +4,9 @@ import {Input, message, Modal, DatePicker, ConfigProvider } from "antd";
 import zh_CN from 'antd/lib/locale-provider/zh_CN';
 import moment from 'moment';
 import 'moment/locale/zh-cn';
+import router from "../../router";
+import Common from "../Common";
+import axios from "axios";
 moment.locale('zh-cn');
 
 const { RangePicker } = DatePicker;
@@ -20,20 +23,57 @@ export default class Table extends React.Component {
             nowRoomData: {},
             nowRoom: '',
             nowType: '',
+            nowU: '',      // 当前操作用户的名字
+            userRecord: {},  // 用户的信息
             lastDataShow: 0,
             nowDataShow: 0,
             waterPrice: 6.12,
             elecPrice: 1.00,
-            endDate: moment(Date.now()).format('YYYY-MM-DD')
+            startDate: moment(Date.now()).format('YYYY-MM-DD'),
+            endDate: moment(Date.now()).format('YYYY-MM-DD'),
+            defaultDays: 0
         }
     }
 
     cannotEditor() {
         message.info("该内容不能可编辑，结果会自动结算！")
     }
+
+
     componentDidMount() {
+        this.userRecordInit().then();
         this.setState({
             nowRoomData: this.nowRoomDataInit()
+        })
+    }
+
+
+   async getAllRoomUser() {
+        return await Common.getAsyncData(router.getAllRoomUser)
+    }
+    async getRecentRecordDate() {
+        return await Common.getAsyncData(router.getRecentRecordDate);
+    }
+
+    async userRecordInit() {
+        let data = await this.getAllRoomUser();
+        let dateTemp = await this.getRecentRecordDate();
+        let startDate = dateTemp.length === 1 ? dateTemp[0].date : moment(Date.now()).format('YYYY-MM-DD');
+        let temp = {};
+        for ( let i=0; i<data.length; i++ ) {
+            console.log(data[i]);
+            temp[data[i].uname] = {
+                uid: data[i].uid,
+                rid: data[i].rid,
+                waterSpd: null,
+                elecSpd: null,
+                totalSpd: null,
+                days: Common.dateCalculate(startDate, this.state.endDate)
+            }
+        }
+        this.setState({
+            userRecord: temp,
+            startDate
         })
     }
 
@@ -134,13 +174,31 @@ export default class Table extends React.Component {
                                 <td
                                     className={style.pointer}
                                     title={"住宿天数"}
-                                    onClick={()=>this.dateSelect()}
+                                    onClick={()=>this.dateSelect(item.data[i].uname, item.data[i].uid)}
                                 >
-                                    31
+                                    {
+                                        this.state.userRecord[item.data[i].uname] ?
+                                            this.state.userRecord[item.data[i].uname].days : this.state.defaultDays
+                                    }
                                 </td>
-                                <td title={"个人水费"}>1000</td>
-                                <td title={"个人电费"}>2000.20</td>
-                                <td title={"个人总费用"}>1000.20</td>
+                                <td title={"个人水费"}>
+                                    {
+                                        this.state.userRecord[item.data[i].uname] ?
+                                            this.state.userRecord[item.data[i].uname].waterSpd : ''
+                                    }
+                                </td>
+                                <td title={"个人电费"}>
+                                    {
+                                        this.state.userRecord[item.data[i].uname] ?
+                                            this.state.userRecord[item.data[i].uname].elecSpd : ''
+                                    }
+                                </td>
+                                <td title={"个人总费用"}>
+                                    {
+                                        this.state.userRecord[item.data[i].uname] ?
+                                            this.state.userRecord[item.data[i].uname].totalSpd : ''
+                                    }
+                                </td>
                             </tr>
 
                         ))
@@ -152,11 +210,31 @@ export default class Table extends React.Component {
                                 <td
                                     className={style.pointer}
                                     title={"住宿天数"}
-                                    onClick={()=>this.dateSelect()}
-                                >31</td>
-                                <td title={"个人水费"}>1000</td>
-                                <td title={"个人电费"}>2000.20</td>
-                                <td title={"个人总费用"}>1000.20</td>
+                                    onClick={()=>this.dateSelect(item.data[i].uname, item.data[i].uid)}
+                                >
+                                    {
+                                        this.state.userRecord[item.data[i].uname] ?
+                                            this.state.userRecord[item.data[i].uname].days : this.state.defaultDays
+                                    }
+                                </td>
+                                <td title={"个人水费"}>
+                                    {
+                                        this.state.userRecord[item.data[i].uname] ?
+                                            this.state.userRecord[item.data[i].uname].waterSpd : ''
+                                    }
+                                </td>
+                                <td title={"个人电费"}>
+                                    {
+                                        this.state.userRecord[item.data[i].uname] ?
+                                            this.state.userRecord[item.data[i].uname].elecSpd : ''
+                                    }
+                                </td>
+                                <td title={"个人总费用"}>
+                                    {
+                                        this.state.userRecord[item.data[i].uname] ?
+                                            this.state.userRecord[item.data[i].uname].totalSpd : ''
+                                    }
+                                </td>
                             </tr>
 
                         ))
@@ -226,10 +304,26 @@ export default class Table extends React.Component {
         });
     }
 
-    dateSelect() {
+    dateSelect(name, uid) {
+        // console.log(name, uid);
+        // let temp = {...this.state.userRecord};
+        // temp[name] = {
+        //     days:
+        // };
         this.setState({
-            dateVisible: true
+            dateVisible: true,
+            // userRecord: temp,
+            nowU: name
         })
+    }
+
+    userDaysChange(e) {
+        let days = Common.dateCalculate(e[0].format('YYYY-MM-DD'), e[1].format('YYYY-MM-DD') );
+        let tempUserRecord = { ...this.state.userRecord };
+        tempUserRecord[this.state.nowU].days = days;
+        this.setState({
+            userRecord: tempUserRecord
+        });
     }
 
 
@@ -242,10 +336,7 @@ export default class Table extends React.Component {
             let nowRoom = this.state.nowRoom;
             let nowType = this.state.nowType;
             let tempNowRoomData = this.state.nowRoomData;
-            // console.log("----> ", nowRoom);
-            // console.log("----> ", nowType);
             tempNowRoomData[nowRoom][nowType] = nowDataShow;
-            // nowType === 'elec' ?
             console.log(tempNowRoomData);
             console.log(roomData);
             console.log(this.props.recordData);
@@ -260,7 +351,6 @@ export default class Table extends React.Component {
             } else if ( nowType === 'elec') {
                 tempNowRoomData[nowRoom]['nowElecSpd'] = nowDataShow - this.props.recordData[nowRoom].elec;
             }
-            document.getElementById('userInput').value = 0;
             this.setState({
                 visible: false,
                 nowDataShow: 0,
@@ -298,7 +388,8 @@ export default class Table extends React.Component {
     }
     disabledDate(current){
         // 不能选今天之后的日期
-        return current > Date.now();
+        // 不能选上一次统计日之前的日子
+        return current > Date.now() || current < (new Date(this.state.startDate) - 1000 * 60 * 60 * 24);
     };
 
     // 回车键结束输入
@@ -318,8 +409,6 @@ export default class Table extends React.Component {
     // 截止时间变化时
     endTimeChange(e){
         let date = e ? e.format('YYYY-MM-DD') : moment(Date.now()).format('YYYY-MM-DD');
-        // console.log(date);
-        // console.log(moment(Date.now()).format('YYYY-MM-DD'))
         this.setState({
             endDate: date
         })
@@ -341,7 +430,9 @@ export default class Table extends React.Component {
         })
     }
 
-
+    tableClick() {
+        console.log("!23")
+    }
 
     render() {
         return (
@@ -354,7 +445,7 @@ export default class Table extends React.Component {
                     <span className={style.desItem}>水费单价：{this.state.waterPrice} 元/吨</span>
                     <span className={style.desItem}>电费单价：{this.state.elecPrice} 元/度</span>
                 </div>
-                <table className={style.gridtable}>
+                <table className={style.gridtable} onClick={()=>this.tableClick()}>
                     <thead>
                     <tr>
                         <th>房间号</th>
@@ -376,6 +467,8 @@ export default class Table extends React.Component {
                     }
                     </tbody>
                 </table>
+                {/*todo 波纹特效*/}
+                {/*<div className={}></div>*/}
                 {
                     this.state.visible ?
                         <Modal
@@ -409,7 +502,7 @@ export default class Table extends React.Component {
                 {
                     this.state.dateVisible ?
                         <Modal
-                            title={"输入住宿开始和结束时间"}
+                            title={`输入【${this.state.nowU}】住宿开始和结束时间`}
                             visible={true}
                             onOk={()=>this.dateOk()}
                             onCancel={()=>this.dateCancel()}
@@ -419,7 +512,11 @@ export default class Table extends React.Component {
                         >
                             <div className={style.ctnBox}>
                                 <ConfigProvider locale={zh_CN}>
-                                    <RangePicker disabledDate={(current)=>this.disabledDate(current)} />
+                                    <RangePicker
+                                        disabledDate={(current)=>this.disabledDate(current)}
+                                        defaultValue={[moment(this.state.startDate), moment()]}
+                                        onChange={(e)=>this.userDaysChange(e)}
+                                    />
                                 </ConfigProvider>
                             </div>
                         </Modal>
@@ -439,7 +536,7 @@ export default class Table extends React.Component {
                             <div className={style.item}>
                                 <span>开始时间：</span>
                                 <ConfigProvider locale={zh_CN}>
-                                    <DatePicker disabled value={moment('2019-10-27')}/>
+                                    <DatePicker disabled value={moment(this.state.startDate)}/>
                                 </ConfigProvider>
                             </div>
                             <div className={style.item}>

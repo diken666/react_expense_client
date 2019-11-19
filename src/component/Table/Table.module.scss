@@ -14,6 +14,13 @@
   height: 1px;
   background: #aaa;
 }
+.colLine {
+  display: inline-block;
+  width: 1px;
+  height: 20px;
+  margin: 0 3px;
+  background: #aaa;
+}
 .item{
   display: flex;
   align-items: center;
