@@ -326,6 +326,7 @@ export default class Table extends React.Component {
             totalDays += userRecord[userList[i]].days;
         }
         if ( type === 'water' ) {
+            // todo 有待改进，同时注意先输入表数后调天数的流程
             perPrice = roomData['nowWaterSpd'] * this.state.waterPrice / totalDays;
             for ( let i=0; i<userList.length; i++ ) {
                 let waterSpd = userRecord[userList[i]].days * perPrice;
