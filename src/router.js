@@ -9,4 +9,5 @@ export default {
     getRecentRecord: url + '/getrecentroomexpense',
     getAllRoomUser: url + '/getallroomuser',      // 获取所有住户信息
     getRecentRecordDate: url + '/getRecentRecordDate',  // 获取最近统计日期
+    saveTableCtn: url + '/saveTableCtn',   // 保存表格内容
 }

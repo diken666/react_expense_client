@@ -33,6 +33,7 @@ class App extends React.Component{
             userState
         })
     }
+
     stateRender(state){
         switch (state) {
             case 'loading':

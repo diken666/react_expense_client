@@ -35,11 +35,6 @@ export default class Table extends React.Component {
         }
     }
 
-    cannotEditor() {
-        message.info("该内容不能可编辑，结果会自动结算！")
-    }
-
-
     componentDidMount() {
         this.userRecordInit().then();
         this.setState({
@@ -78,6 +73,46 @@ export default class Table extends React.Component {
         })
     }
 
+    userRecordReset(name) {
+        let userRecord = { ...this.state.userRecord };
+        let keys = Object.keys(userRecord);
+        if ( name ) {
+            let rid = userRecord[name].rid;
+            for ( let i=0; i<keys.length; i++) {
+                if ( rid === userRecord[keys[i]].rid ) {
+                    userRecord[keys[i]].waterSpd = null;
+                    userRecord[keys[i]].elecSpd = null;
+                    userRecord[keys[i]].totalSpd = null;
+                }
+            }
+            this.nowRoomDataReset(rid);
+            this.setState({
+                userRecord
+            })
+        } else {
+            for ( let i=0; i<keys.length; i++) {
+                userRecord[keys[i]].waterSpd = null;
+                userRecord[keys[i]].elecSpd = null;
+                userRecord[keys[i]].totalSpd = null;
+            }
+        }
+    }
+
+    nowRoomDataReset(roomName) {
+        let nowRoomData = { ...this.state.nowRoomData };
+        if ( roomName ) {
+            nowRoomData[roomName].water = null;
+            nowRoomData[roomName].elec = null;
+            nowRoomData[roomName].nowWaterSpd = null;
+            nowRoomData[roomName].nowElecSpd = null;
+            nowRoomData[roomName].nowWaterCost = null;
+            nowRoomData[roomName].nowElecCost = null;
+            this.setState({
+                nowRoomData
+            })
+        }
+    }
+
     nowRoomDataInit() {
         let res = {};
         for ( let i=1; i<= 13; i++ ) {
@@ -88,8 +123,7 @@ export default class Table extends React.Component {
                 nowWaterSpd: null,
                 nowElecSpd: null,
                 nowWaterCost: null,
-                nowElecCost: null,
-                userData: []
+                nowElecCost: null
             };
             res[`B${index}`] = {
                 water: null,
@@ -97,8 +131,7 @@ export default class Table extends React.Component {
                 nowWaterSpd: null,
                 nowElecSpd: null,
                 nowWaterCost: null,
-                nowElecCost: null,
-                userData: []
+                nowElecCost: null
             }
         }
         return res
@@ -134,6 +167,7 @@ export default class Table extends React.Component {
                                     className={style.pointer}
                                     onClick={()=> this.tableTdClick(item.name, 'water')}
                                 >
+                                    <i className={style.editable}/>
                                     {
                                         this.recordRender(this.props.recordData[item.name].water, this.state.nowRoomData[item.name].water)
                                     }
@@ -144,6 +178,7 @@ export default class Table extends React.Component {
                                     className={style.pointer}
                                     onClick={()=> this.tableTdClick(item.name, 'elec')}
                                 >
+                                    <i className={style.editable}/>
                                     {
                                         this.recordRender(this.props.recordData[item.name].elec, this.state.nowRoomData[item.name].elec)
                                     }
@@ -151,7 +186,6 @@ export default class Table extends React.Component {
                                 <td
                                     rowSpan={item.data.length}
                                     title={"本期用水和本期用电"}
-                                    onClick={()=>this.cannotEditor()}
                                 >
                                     {this.state.nowRoomData[item.name].nowWaterSpd !== null ? this.state.nowRoomData[item.name].nowWaterSpd: ''}
                                     <div className={style.line}/>
@@ -160,14 +194,13 @@ export default class Table extends React.Component {
                                 <td
                                     rowSpan={item.data.length}
                                     title={"本期水费和本期电费"}
-                                    onClick={()=>this.cannotEditor()}
                                 >
-                                    {this.state.nowRoomData[item.name].nowWaterSpd !== null ?
-                                        this.state.nowRoomData[item.name].nowWaterSpd * this.state.waterPrice
+                                    {this.state.nowRoomData[item.name].nowWaterCost !== null ?
+                                        this.state.nowRoomData[item.name].nowWaterCost
                                         : ''}
                                     <div className={style.line}/>
-                                    {this.state.nowRoomData[item.name].nowElecSpd !== null ?
-                                        this.state.nowRoomData[item.name].nowElecSpd * this.state.elecPrice
+                                    {this.state.nowRoomData[item.name].nowElecCost !== null ?
+                                        this.state.nowRoomData[item.name].nowElecCost
                                         : ''}
                                 </td>
                                 <td title={"住户名"}>{ item.data[i] ? item.data[i].uname: '' }</td>
@@ -177,23 +210,24 @@ export default class Table extends React.Component {
                                     title={"住宿天数"}
                                     onClick={()=>this.dateSelect(item.data[i].uname)}
                                 >
+                                    <i className={style.editable}/>
                                     {
                                         this.state.userRecord[item.data[i].uname].days
                                     }
                                 </td>
-                                <td title={"个人水费"} onClick={()=>this.cannotEditor()}>
+                                <td title={"个人水费"}>
                                     {
                                         this.state.userRecord[item.data[i].uname] ?
                                             this.state.userRecord[item.data[i].uname].waterSpd : ''
                                     }
                                 </td>
-                                <td title={"个人电费"} onClick={()=>this.cannotEditor()}>
+                                <td title={"个人电费"}>
                                     {
                                         this.state.userRecord[item.data[i].uname] ?
                                             this.state.userRecord[item.data[i].uname].elecSpd : ''
                                     }
                                 </td>
-                                <td title={"个人总费用"} onClick={()=>this.cannotEditor()}>
+                                <td title={"个人总费用"}>
                                     {
                                         this.state.userRecord[item.data[i].uname] ?
                                             this.state.userRecord[item.data[i].uname].totalSpd : ''
@@ -212,23 +246,24 @@ export default class Table extends React.Component {
                                     title={"住宿天数"}
                                     onClick={()=>this.dateSelect(item.data[i].uname)}
                                 >
+                                    <i className={style.editable}/>
                                     {
                                         this.state.userRecord[item.data[i].uname].days
                                     }
                                 </td>
-                                <td title={"个人水费"} onClick={()=>this.cannotEditor()}>
+                                <td title={"个人水费"}>
                                     {
                                         this.state.userRecord[item.data[i].uname] ?
                                             this.state.userRecord[item.data[i].uname].waterSpd : ''
                                     }
                                 </td>
-                                <td title={"个人电费"} onClick={()=>this.cannotEditor()}>
+                                <td title={"个人电费"}>
                                     {
                                         this.state.userRecord[item.data[i].uname] ?
                                             this.state.userRecord[item.data[i].uname].elecSpd : ''
                                     }
                                 </td>
-                                <td title={"个人总费用"} onClick={()=>this.cannotEditor()}>
+                                <td title={"个人总费用"}>
                                     {
                                         this.state.userRecord[item.data[i].uname] ?
                                             this.state.userRecord[item.data[i].uname].totalSpd : ''
@@ -249,35 +284,37 @@ export default class Table extends React.Component {
                             className={style.pointer}
                             onClick={()=> this.tableTdClick(item.name, 'water')}
                         >
+                            <i className={style.editable}/>
                             {
                                 this.recordRender(this.props.recordData[item.name].water, this.state.nowRoomData[item.name].water)
                             }
                         </td>
                         <td title={"本期电表数和上期电表数"} className={style.pointer} onClick={()=> this.tableTdClick(item.name, 'elec')}>
+                            <i className={style.editable}/>
                             {
                                 this.recordRender(this.props.recordData[item.name].elec, this.state.nowRoomData[item.name].elec)
                             }
                         </td>
-                        <td title={"本期用电和本期用水"} onClick={()=>this.cannotEditor()}>
+                        <td title={"本期用电和本期用水"}>
                             {this.state.nowRoomData[item.name].nowWaterSpd !== null ? this.state.nowRoomData[item.name].nowWaterSpd: ''}
                             <div className={style.line}/>
                             {this.state.nowRoomData[item.name].nowElecSpd !== null ? this.state.nowRoomData[item.name].nowElecSpd: ''}
                         </td>
-                        <td title={"本期水费和本期电费"} onClick={()=>this.cannotEditor()}>
-                            {this.state.nowRoomData[item.name].nowWaterSpd !== null ?
-                                this.state.nowRoomData[item.name].nowWaterSpd * this.state.waterPrice
+                        <td title={"本期水费和本期电费"}>
+                            {this.state.nowRoomData[item.name].nowWaterCost !== null ?
+                                this.state.nowRoomData[item.name].nowWaterCost
                                 : ''}
                             <div className={style.line}/>
-                            {this.state.nowRoomData[item.name].nowElecSpd !== null ?
-                                this.state.nowRoomData[item.name].nowElecSpd * this.state.elecPrice
+                            {this.state.nowRoomData[item.name].nowElecCost !== null ?
+                                this.state.nowRoomData[item.name].nowElecCost
                                 : ''}
                         </td>
                         <td title={"住户名"}>{ '' }</td>
                         <td title={"部门"}>{ '' }</td>
                         <td title={"住宿天数"}> </td>
-                        <td title={"个人水费"} onClick={()=>this.cannotEditor()}> </td>
-                        <td title={"个人电费"} onClick={()=>this.cannotEditor()}> </td>
-                        <td title={"个人总费用"} onClick={()=>this.cannotEditor()}> </td>
+                        <td title={"个人水费"}> </td>
+                        <td title={"个人电费"}> </td>
+                        <td title={"个人总费用"}> </td>
                     </tr>
 
                 ))
@@ -342,7 +379,7 @@ export default class Table extends React.Component {
     }
 
 
-    handleOk(){
+    handleOk() {
         let lastDataShow = this.state.lastDataShow;
         let nowDataShow = this.state.nowDataShow;
         console.log(lastDataShow, nowDataShow);
@@ -358,8 +395,10 @@ export default class Table extends React.Component {
 
             if ( nowType === 'water' ) {
                 tempNowRoomData[nowRoom]['nowWaterSpd'] = nowDataShow - this.props.recordData[nowRoom].water;
+                tempNowRoomData[nowRoom]['nowWaterCost'] = tempNowRoomData[nowRoom]['nowWaterSpd'] * this.state.waterPrice;
             } else if ( nowType === 'elec') {
                 tempNowRoomData[nowRoom]['nowElecSpd'] = nowDataShow - this.props.recordData[nowRoom].elec;
+                tempNowRoomData[nowRoom]['nowElecCost'] = tempNowRoomData[nowRoom]['nowElecSpd'] * this.state.elecPrice;
             }
 
             for ( let i=0; i<roomData.length; i++ ) {
@@ -401,13 +440,17 @@ export default class Table extends React.Component {
         this.setState({
             userRecord: tempUserRecord,
             dateVisible: false
+        }, ()=>{
+            this.userRecordReset(this.state.nowU);
         })
     }
+
     dateCancel() {
         this.setState({
             dateVisible: false
         })
     }
+
     configBoxOk(){
         let date = this.state.tempEndDate;
         let keys = Object.keys(this.state.userRecord);
@@ -415,10 +458,12 @@ export default class Table extends React.Component {
         for ( let i=0; i<keys.length; i++ ) {
             tempUserRecord[keys[i]].days = Common.dateCalculate(this.state.startDate, date);
         }
+        this.userRecordReset();
         this.setState({
             endDate: date,
             userRecord: tempUserRecord,
-            configBoxVisible: false
+            configBoxVisible: false,
+            nowRoomData: this.nowRoomDataInit()
         })
     }
     configBoxCancel(){
@@ -470,12 +515,11 @@ export default class Table extends React.Component {
         })
     }
 
-    tableClick(e) {
-        let x = e.clientX - 2;
-        let y = e.clientY - 2;
-        document.querySelector('.'+style.buttonWrap).style.top = y+'px';
-        document.querySelector('.'+style.buttonWrap).style.left = x+'px';
-    }
+    // //
+    // roomDataCost() {
+    //
+    // }
+
 
     submit() {
         let userRecordKeys = Object.keys(this.state.userRecord);
@@ -487,18 +531,34 @@ export default class Table extends React.Component {
         // nowElecSpd: null
         // nowWaterCost: null
         // nowWaterSpd: null
-        // userData: []
         // water: null
         for ( let i=0; i<nowRoomDataKeys.length; i++ ) {
-            // if (  )
-            console.log(nowRoomData[nowRoomDataKeys[i]])
+            if ( nowRoomData[nowRoomDataKeys[i]].water === null ||  nowRoomData[nowRoomDataKeys[i]].elec === null ) {
+                attention = `【${nowRoomDataKeys[i]}】房间水电未填写完整`;
+                break;
+            }
         }
-        console.log("userRecord ---> ", this.state.userRecord);
-        console.log("roomData ---> ", this.state.roomData);
-        console.log("nowRoomData ---> ", this.state.nowRoomData);
-        this.setState({
-            submitLoading: true
-        })
+        if (attention.length > 0) {
+            message.warn(attention)
+        } else {
+            this.setState({
+                submitLoading: true
+            })
+        }
+
+        Common.postData(nowRoomData, router.saveTableCtn);
+
+        // console.log("userRecord ---> ", this.state.userRecord);
+        // console.log("roomData ---> ", this.state.roomData);
+        // console.log("nowRoomData ---> ", this.state.nowRoomData);
+
+    }
+
+    tableClick(e) {
+        let x = e.clientX - 2;
+        let y = e.clientY - 2;
+        document.querySelector('.'+style.buttonWrap).style.top = y+'px';
+        document.querySelector('.'+style.buttonWrap).style.left = x+'px';
     }
 
     render() {
@@ -512,36 +572,36 @@ export default class Table extends React.Component {
                     <span className={style.desItem}>水费单价：{this.state.waterPrice} 元/吨</span>
                     <span className={style.desItem}>电费单价：{this.state.elecPrice} 元/度</span>
                 </div>
-                <table className={style.gridtable} onClick={(e)=>this.tableClick(e)}>
+                <table className={style.gridtable}  onClick={(e)=>this.tableClick(e)}>
                     <thead>
-                    <tr>
-                        <th>房间号</th>
-                        <th>本期水表数 <br/> 上期水表数</th>
-                        <th>本期电表数 <br/> 上期电表数</th>
-                        <th>本期用水(吨) <br/> 本期用电(度)</th>
-                        <th>本期水费(元) <br/> 本期电费(元)</th>
-                        <th>姓名</th>
-                        <th>部门</th>
-                        <th>住宿天数</th>
-                        <th>个人水费</th>
-                        <th>个人电费</th>
-                        <th>个人费用总计</th>
-                    </tr>
+                        <tr>
+                            <th>房间号</th>
+                            <th>本期水表数 <br/> 上期水表数</th>
+                            <th>本期电表数 <br/> 上期电表数</th>
+                            <th>本期用水(吨) <br/> 本期用电(度)</th>
+                            <th>本期水费(元) <br/> 本期电费(元)</th>
+                            <th>姓名</th>
+                            <th>部门</th>
+                            <th>住宿天数</th>
+                            <th>个人水费</th>
+                            <th>个人电费</th>
+                            <th>个人费用总计</th>
+                        </tr>
                     </thead>
-                    <tbody>
+                    <tbody className={style.tbody}>
                     {
                         this.tableRender(this.props.roomData)
                     }
                     </tbody>
                 </table>
+                <div className={style.submitCon}>
+                    <Button loading={this.state.submitLoading} type="primary" block size={"large"} onClick={()=>this.submit()} >提交</Button>
+                </div>
                 <section className={style.buttonWrap}>
                     <div className={style.circle}/>
                     <div className={style.circle}/>
                     <div className={style.circle}/>
                 </section>
-                <div className={style.submitCon}>
-                    <Button loading={this.state.submitLoading} type="primary" block size={"large"} onClick={()=>this.submit()} >提交</Button>
-                </div>
                 {
                     this.state.visible ?
                         <Modal

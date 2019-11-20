@@ -36,7 +36,6 @@ export default class Login extends React.Component {
             return
         }
         let data = ( await this.getLoginState(id, psw) ).data;
-        console.log(data)
         if ( data.state === 'error' ) {
             message.warn(data.msg);
             return
@@ -49,7 +48,9 @@ export default class Login extends React.Component {
     }
 
     inputKeyUp(e){
-
+        if ( e.keyCode === 13 ){
+            this.loginClick().then();
+        }
     }
 
     render() {
