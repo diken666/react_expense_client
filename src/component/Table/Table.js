@@ -1,8 +1,8 @@
 import React from 'react';
 import style from './Table.module.scss';
-import {Input, message, Modal, DatePicker, ConfigProvider } from "antd";
+import {Input, message, Modal, DatePicker, ConfigProvider, Button} from "antd";
 import zh_CN from 'antd/lib/locale-provider/zh_CN';
-import moment, {now} from 'moment';
+import moment from 'moment';
 import 'moment/locale/zh-cn';
 import router from "../../router";
 import Common from "../Common";
@@ -17,8 +17,9 @@ export default class Table extends React.Component {
             visible: false,
             dateVisible: false,
             configBoxVisible: false,
+            submitLoading: false,     // 提交按钮的loading状态
             recordData: [],
-            roomData: [],
+            roomData: {},
             nowRoomData: {},
             nowRoom: '',
             nowType: '',
@@ -30,8 +31,7 @@ export default class Table extends React.Component {
             waterPrice: 6.12,
             elecPrice: 1.00,
             startDate: moment(Date.now()).format('YYYY-MM-DD'),
-            endDate: moment(Date.now()).format('YYYY-MM-DD'),
-            defaultDays: 0
+            endDate: moment(Date.now()).format('YYYY-MM-DD')
         }
     }
 
@@ -178,8 +178,7 @@ export default class Table extends React.Component {
                                     onClick={()=>this.dateSelect(item.data[i].uname)}
                                 >
                                     {
-                                        this.state.userRecord[item.data[i].uname] ?
-                                            this.state.userRecord[item.data[i].uname].days : this.state.defaultDays
+                                        this.state.userRecord[item.data[i].uname].days
                                     }
                                 </td>
                                 <td title={"个人水费"} onClick={()=>this.cannotEditor()}>
@@ -214,8 +213,7 @@ export default class Table extends React.Component {
                                     onClick={()=>this.dateSelect(item.data[i].uname)}
                                 >
                                     {
-                                        this.state.userRecord[item.data[i].uname] ?
-                                            this.state.userRecord[item.data[i].uname].days : this.state.defaultDays
+                                        this.state.userRecord[item.data[i].uname].days
                                     }
                                 </td>
                                 <td title={"个人水费"} onClick={()=>this.cannotEditor()}>
@@ -318,31 +316,24 @@ export default class Table extends React.Component {
         });
     }
 
+    // 计算花费
     calculateSpd(type, userList, roomData) {
         let totalDays = 0;
-        let perPrice = 0;
-        let userRecord = {...this.state.userRecord};
+        let userRecord = { ...this.state.userRecord };
         for ( let i=0; i<userList.length; i++ ) {
             totalDays += userRecord[userList[i]].days;
         }
-        if ( type === 'water' ) {
-            // todo 有待改进，同时注意先输入表数后调天数的流程
-            perPrice = roomData['nowWaterSpd'] * this.state.waterPrice / totalDays;
-            for ( let i=0; i<userList.length; i++ ) {
-                let waterSpd = userRecord[userList[i]].days * perPrice;
-                userRecord[userList[i]].waterSpd = waterSpd.toFixed(3);
-                if (userRecord[userList[i]].elecSpd) {
-                    userRecord[userList[i]].totalSpd = (parseFloat(userRecord[userList[i]].elecSpd) + waterSpd).toFixed(3);
-                }
-            }
-        } else if (type === 'elec') {
-            perPrice = roomData['nowElecSpd'] * this.state.elecPrice / totalDays;
-            for ( let i=0; i<userList.length; i++ ) {
-                let elecSpd = userRecord[userList[i]].days * perPrice;
-                userRecord[userList[i]].elecSpd = elecSpd.toFixed(3);
-                if (userRecord[userList[i]].waterSpd) {
-                    userRecord[userList[i]].totalSpd = (parseFloat(userRecord[userList[i]].waterSpd) + elecSpd).toFixed(3);
-                }
+
+        let waterPerPrice = roomData['nowWaterSpd'] ? (roomData['nowWaterSpd'] * this.state.waterPrice / totalDays) : null;
+        let elecPerPrice = roomData['nowElecSpd'] ? (roomData['nowElecSpd'] * this.state.elecPrice / totalDays) : null;
+        // todo 注意先输入表数后调天数的流程
+        for ( let i=0; i<userList.length; i++ ) {
+            let waterSpd = waterPerPrice !== null ? userRecord[userList[i]].days * waterPerPrice : null;
+            let elecSpd = elecPerPrice !== null ? userRecord[userList[i]].days * elecPerPrice : null;
+            userRecord[userList[i]].waterSpd = waterSpd !== null ? waterSpd.toFixed(3) : null;
+            userRecord[userList[i]].elecSpd = elecSpd !== null ? elecSpd.toFixed(3) : null;
+            if (waterSpd !== null && elecSpd !== null) {
+                userRecord[userList[i]].totalSpd = (elecSpd + waterSpd).toFixed(3);
             }
         }
         this.setState({
@@ -486,6 +477,30 @@ export default class Table extends React.Component {
         document.querySelector('.'+style.buttonWrap).style.left = x+'px';
     }
 
+    submit() {
+        let userRecordKeys = Object.keys(this.state.userRecord);
+        let nowRoomData = { ...this.state.nowRoomData };
+        let nowRoomDataKeys = Object.keys(nowRoomData);
+        let attention = '';
+        // elec: null
+        // nowElecCost: null
+        // nowElecSpd: null
+        // nowWaterCost: null
+        // nowWaterSpd: null
+        // userData: []
+        // water: null
+        for ( let i=0; i<nowRoomDataKeys.length; i++ ) {
+            // if (  )
+            console.log(nowRoomData[nowRoomDataKeys[i]])
+        }
+        console.log("userRecord ---> ", this.state.userRecord);
+        console.log("roomData ---> ", this.state.roomData);
+        console.log("nowRoomData ---> ", this.state.nowRoomData);
+        this.setState({
+            submitLoading: true
+        })
+    }
+
     render() {
         return (
             <div className={style.container}>
@@ -524,6 +539,9 @@ export default class Table extends React.Component {
                     <div className={style.circle}/>
                     <div className={style.circle}/>
                 </section>
+                <div className={style.submitCon}>
+                    <Button loading={this.state.submitLoading} type="primary" block size={"large"} onClick={()=>this.submit()} >提交</Button>
+                </div>
                 {
                     this.state.visible ?
                         <Modal
