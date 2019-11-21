@@ -67,6 +67,9 @@ export default class Login extends React.Component {
                             <i className={[style.icon, style.password].join(" ")} />
                             <input id="psw" className={style.input} type="password" onKeyUp={(e)=>this.inputKeyUp(e)}/>
                         </div>
+                        <div className={style.inputItem}>
+                            <input id="psw" className={style.input} type="password" onKeyUp={(e)=>this.inputKeyUp(e)}/>
+                        </div>
                         <div className={style.loginBtn}>
                             <Button loading={this.state.loginLoading} type="primary" block size={"large"} onClick={()=>this.loginClick()} >登陆</Button>
                         </div>

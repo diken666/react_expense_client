@@ -522,8 +522,8 @@ export default class Table extends React.Component {
 
 
     submit() {
-        let userRecordKeys = Object.keys(this.state.userRecord);
         let nowRoomData = { ...this.state.nowRoomData };
+        let userRecord = { ...this.state.userRecord };
         let nowRoomDataKeys = Object.keys(nowRoomData);
         let attention = '';
         // elec: null
@@ -546,7 +546,7 @@ export default class Table extends React.Component {
             })
         }
 
-        Common.postData(nowRoomData, router.saveTableCtn);
+        Common.postData(nowRoomData, userRecord, router.saveTableCtn);
 
         // console.log("userRecord ---> ", this.state.userRecord);
         // console.log("roomData ---> ", this.state.roomData);
