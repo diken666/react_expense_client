@@ -21,7 +21,7 @@
 }
 .loginTitle{
   margin: 20px 0;
-  height: 80px;
+  height: 70px;
   line-height: 80px;
   font-size: 30px;
   font-weight: bold;
@@ -31,7 +31,7 @@
 .inputItem{
   display: flex;
   align-items: center;
-  margin: 40px 40px;
+  margin: 30px 40px;
   background: #fff;
   height: 40px;
   line-height: 40px;
@@ -54,6 +54,15 @@
 .password{
   background: url("../img/password.png");
   background-size: 20px;
+}
+.code{
+  background: url("../img/code.png");
+  background-size: 20px;
+  flex-shrink: 0;
+}
+.codeCanvas {
+  border: 1px solid #eee;
+  border-radius: 5px;
 }
 
 .input{

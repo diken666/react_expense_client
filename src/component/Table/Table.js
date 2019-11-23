@@ -215,19 +215,19 @@ export default class Table extends React.Component {
                                         this.state.userRecord[item.data[i].uname].days
                                     }
                                 </td>
-                                <td title={"个人水费"}>
+                                <td title={"个人水费(元)"}>
                                     {
                                         this.state.userRecord[item.data[i].uname] ?
                                             this.state.userRecord[item.data[i].uname].waterSpd : ''
                                     }
                                 </td>
-                                <td title={"个人电费"}>
+                                <td title={"个人电费(元)"}>
                                     {
                                         this.state.userRecord[item.data[i].uname] ?
                                             this.state.userRecord[item.data[i].uname].elecSpd : ''
                                     }
                                 </td>
-                                <td title={"个人总费用"}>
+                                <td title={"个人总费用(元)"}>
                                     {
                                         this.state.userRecord[item.data[i].uname] ?
                                             this.state.userRecord[item.data[i].uname].totalSpd : ''
@@ -251,19 +251,19 @@ export default class Table extends React.Component {
                                         this.state.userRecord[item.data[i].uname].days
                                     }
                                 </td>
-                                <td title={"个人水费"}>
+                                <td title={"个人水费(元)"}>
                                     {
                                         this.state.userRecord[item.data[i].uname] ?
                                             this.state.userRecord[item.data[i].uname].waterSpd : ''
                                     }
                                 </td>
-                                <td title={"个人电费"}>
+                                <td title={"个人电费(元)"}>
                                     {
                                         this.state.userRecord[item.data[i].uname] ?
                                             this.state.userRecord[item.data[i].uname].elecSpd : ''
                                     }
                                 </td>
-                                <td title={"个人总费用"}>
+                                <td title={"个人总费用(元)"}>
                                     {
                                         this.state.userRecord[item.data[i].uname] ?
                                             this.state.userRecord[item.data[i].uname].totalSpd : ''
@@ -312,9 +312,9 @@ export default class Table extends React.Component {
                         <td title={"住户名"}>{ '' }</td>
                         <td title={"部门"}>{ '' }</td>
                         <td title={"住宿天数"}> </td>
-                        <td title={"个人水费"}> </td>
-                        <td title={"个人电费"}> </td>
-                        <td title={"个人总费用"}> </td>
+                        <td title={"个人水费(元)"}> </td>
+                        <td title={"个人电费(元)"}> </td>
+                        <td title={"个人总费用(元)"}> </td>
                     </tr>
 
                 ))
@@ -363,7 +363,6 @@ export default class Table extends React.Component {
 
         let waterPerPrice = roomData['nowWaterSpd'] ? (roomData['nowWaterSpd'] * this.state.waterPrice / totalDays) : null;
         let elecPerPrice = roomData['nowElecSpd'] ? (roomData['nowElecSpd'] * this.state.elecPrice / totalDays) : null;
-        // todo 注意先输入表数后调天数的流程
         for ( let i=0; i<userList.length; i++ ) {
             let waterSpd = waterPerPrice !== null ? userRecord[userList[i]].days * waterPerPrice : null;
             let elecSpd = elecPerPrice !== null ? userRecord[userList[i]].days * elecPerPrice : null;
@@ -395,10 +394,10 @@ export default class Table extends React.Component {
 
             if ( nowType === 'water' ) {
                 tempNowRoomData[nowRoom]['nowWaterSpd'] = nowDataShow - this.props.recordData[nowRoom].water;
-                tempNowRoomData[nowRoom]['nowWaterCost'] = tempNowRoomData[nowRoom]['nowWaterSpd'] * this.state.waterPrice;
+                tempNowRoomData[nowRoom]['nowWaterCost'] = Math.floor(tempNowRoomData[nowRoom]['nowWaterSpd'] * this.state.waterPrice * 100) / 100;
             } else if ( nowType === 'elec') {
                 tempNowRoomData[nowRoom]['nowElecSpd'] = nowDataShow - this.props.recordData[nowRoom].elec;
-                tempNowRoomData[nowRoom]['nowElecCost'] = tempNowRoomData[nowRoom]['nowElecSpd'] * this.state.elecPrice;
+                tempNowRoomData[nowRoom]['nowElecCost'] = Math.floor(tempNowRoomData[nowRoom]['nowElecSpd'] * this.state.elecPrice * 100) / 100;
             }
 
             for ( let i=0; i<roomData.length; i++ ) {
@@ -430,13 +429,18 @@ export default class Table extends React.Component {
     dateOk() {
         let target = this.state.targetStartAndEndDate;
         let days = 0;
+        let tempUserRecord = { ...this.state.userRecord };
         if(target.length === 2) {
             days = Common.dateCalculate(target[0].format('YYYY-MM-DD'), target[1].format('YYYY-MM-DD') );
+            tempUserRecord[this.state.nowU].startDate = target[0].format('YYYY-MM-DD');
+            tempUserRecord[this.state.nowU].endDate = target[1].format('YYYY-MM-DD');
         }
-        let tempUserRecord = { ...this.state.userRecord };
+        if(target.length !==2) {
+            days = Common.dateCalculate(this.state.startDate, this.state.endDate );
+            tempUserRecord[this.state.nowU].startDate = this.state.startDate;
+            tempUserRecord[this.state.nowU].endDate = this.state.endDate;
+        }
         tempUserRecord[this.state.nowU].days = days;
-        tempUserRecord[this.state.nowU].startDate = target[0].format('YYYY-MM-DD');
-        tempUserRecord[this.state.nowU].endDate = target[1].format('YYYY-MM-DD');
         this.setState({
             userRecord: tempUserRecord,
             dateVisible: false
@@ -548,10 +552,6 @@ export default class Table extends React.Component {
 
         Common.postData(nowRoomData, userRecord, router.saveTableCtn);
 
-        // console.log("userRecord ---> ", this.state.userRecord);
-        // console.log("roomData ---> ", this.state.roomData);
-        // console.log("nowRoomData ---> ", this.state.nowRoomData);
-
     }
 
     tableClick(e) {
@@ -583,9 +583,9 @@ export default class Table extends React.Component {
                             <th>姓名</th>
                             <th>部门</th>
                             <th>住宿天数</th>
-                            <th>个人水费</th>
-                            <th>个人电费</th>
-                            <th>个人费用总计</th>
+                            <th>个人水费(元)</th>
+                            <th>个人电费(元)</th>
+                            <th>个人费用总计(元)</th>
                         </tr>
                     </thead>
                     <tbody className={style.tbody}>
@@ -655,6 +655,7 @@ export default class Table extends React.Component {
                                         onChange={(e)=>this.userDaysChange(e)}
                                     />
                                 </ConfigProvider>
+                                <span style={{marginLeft: "10px"}}>(包含截止当天)</span>
                             </div>
                         </Modal>
                         : ''
@@ -685,6 +686,7 @@ export default class Table extends React.Component {
                                         onChange={(e)=>this.endTimeChange(e)}
                                     />
                                 </ConfigProvider>
+                                <span style={{marginLeft: "10px"}}> (包含当天)</span>
                             </div>
                             <div className={style.item}>
                                 <span>水费单价：</span>
