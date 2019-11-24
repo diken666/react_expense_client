@@ -16,6 +16,7 @@ export default class Login extends React.Component {
             validStr: '',
         }
     }
+    // todo 验证码更新问题
     componentDidMount() {
         let VergifyGraph = (function (Main) {
             Main.random = function (min, max) { return Math.floor(Math.random() * (max - min) + min) };
