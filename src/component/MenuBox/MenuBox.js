@@ -19,8 +19,12 @@ export default class MenuBox extends React.Component {
                     <i className={[style.icon, style.home].join(" ")} />
                     首页
                 </div>
-                <div className={style.item}>1</div>
-                <div className={style.item}>1</div>
+                <div className={style.item}>
+                    添加记录
+                </div>
+                <div className={style.item}>
+                    修改成员
+                </div>
                 <div className={style.item}>1</div>
             </Sider>
         )
