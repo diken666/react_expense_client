@@ -519,10 +519,6 @@ export default class Table extends React.Component {
         })
     }
 
-    // //
-    // roomDataCost() {
-    //
-    // }
 
 
     submit() {
