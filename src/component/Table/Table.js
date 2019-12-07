@@ -217,19 +217,19 @@ export default class Table extends React.Component {
                                 </td>
                                 <td title={"个人水费(元)"}>
                                     {
-                                        this.state.userRecord[item.data[i].uname] ?
+                                        this.state.userRecord[item.data[i].uname] !== null ?
                                             this.state.userRecord[item.data[i].uname].waterSpd : ''
                                     }
                                 </td>
                                 <td title={"个人电费(元)"}>
                                     {
-                                        this.state.userRecord[item.data[i].uname] ?
+                                        this.state.userRecord[item.data[i].uname] !== null ?
                                             this.state.userRecord[item.data[i].uname].elecSpd : ''
                                     }
                                 </td>
                                 <td title={"个人总费用(元)"}>
                                     {
-                                        this.state.userRecord[item.data[i].uname] ?
+                                        this.state.userRecord[item.data[i].uname]  !== null ?
                                             this.state.userRecord[item.data[i].uname].totalSpd : ''
                                     }
                                 </td>
@@ -253,19 +253,19 @@ export default class Table extends React.Component {
                                 </td>
                                 <td title={"个人水费(元)"}>
                                     {
-                                        this.state.userRecord[item.data[i].uname] ?
+                                        this.state.userRecord[item.data[i].uname]  !== null ?
                                             this.state.userRecord[item.data[i].uname].waterSpd : ''
                                     }
                                 </td>
                                 <td title={"个人电费(元)"}>
                                     {
-                                        this.state.userRecord[item.data[i].uname] ?
+                                        this.state.userRecord[item.data[i].uname]  !== null ?
                                             this.state.userRecord[item.data[i].uname].elecSpd : ''
                                     }
                                 </td>
                                 <td title={"个人总费用(元)"}>
                                     {
-                                        this.state.userRecord[item.data[i].uname] ?
+                                        this.state.userRecord[item.data[i].uname]  !== null ?
                                             this.state.userRecord[item.data[i].uname].totalSpd : ''
                                     }
                                 </td>
@@ -360,9 +360,8 @@ export default class Table extends React.Component {
         for ( let i=0; i<userList.length; i++ ) {
             totalDays += userRecord[userList[i]].days;
         }
-
-        let waterPerPrice = roomData['nowWaterSpd'] ? (roomData['nowWaterSpd'] * this.state.waterPrice / totalDays) : null;
-        let elecPerPrice = roomData['nowElecSpd'] ? (roomData['nowElecSpd'] * this.state.elecPrice / totalDays) : null;
+        let waterPerPrice = roomData['nowWaterSpd'] !== null ? (roomData['nowWaterSpd'] * this.state.waterPrice / totalDays) : null;
+        let elecPerPrice = roomData['nowElecSpd'] !== null ? (roomData['nowElecSpd'] * this.state.elecPrice / totalDays) : null;
         for ( let i=0; i<userList.length; i++ ) {
             let waterSpd = waterPerPrice !== null ? userRecord[userList[i]].days * waterPerPrice : null;
             let elecSpd = elecPerPrice !== null ? userRecord[userList[i]].days * elecPerPrice : null;
@@ -381,16 +380,12 @@ export default class Table extends React.Component {
     handleOk() {
         let lastDataShow = this.state.lastDataShow;
         let nowDataShow = this.state.nowDataShow;
-        console.log(lastDataShow, nowDataShow);
         if ( nowDataShow >= lastDataShow ) {
             let roomData = this.props.roomData;
             let nowRoom = this.state.nowRoom;
             let nowType = this.state.nowType;
             let tempNowRoomData = this.state.nowRoomData;
             tempNowRoomData[nowRoom][nowType] = nowDataShow;
-            console.log(tempNowRoomData);
-            console.log(roomData);
-            console.log(this.props.recordData);
 
             if ( nowType === 'water' ) {
                 tempNowRoomData[nowRoom]['nowWaterSpd'] = nowDataShow - this.props.recordData[nowRoom].water;
@@ -407,7 +402,6 @@ export default class Table extends React.Component {
                         userList.push(roomData[i].data[j].uname)
                     }
                     this.calculateSpd(nowType, userList, tempNowRoomData[nowRoom]);
-                    console.log(nowType);
                     break;
                 }
             }
@@ -426,6 +420,7 @@ export default class Table extends React.Component {
             visible: false
         })
     }
+
     dateOk() {
         let target = this.state.targetStartAndEndDate;
         let days = 0;
@@ -513,7 +508,7 @@ export default class Table extends React.Component {
 
     // 当电的单价变化时
     elecPriceChange(e) {
-        let price = e.target.value ? parseFloat(e.target.value) : 6.12;
+        let price = e.target.value ? parseFloat(e.target.value) : 1;
         this.setState({
             elecPrice: price
         })
@@ -526,12 +521,6 @@ export default class Table extends React.Component {
         let userRecord = { ...this.state.userRecord };
         let nowRoomDataKeys = Object.keys(nowRoomData);
         let attention = '';
-        // elec: null
-        // nowElecCost: null
-        // nowElecSpd: null
-        // nowWaterCost: null
-        // nowWaterSpd: null
-        // water: null
         for ( let i=0; i<nowRoomDataKeys.length; i++ ) {
             if ( nowRoomData[nowRoomDataKeys[i]].water === null ||  nowRoomData[nowRoomDataKeys[i]].elec === null ) {
                 attention = `【${nowRoomDataKeys[i]}】房间水电未填写完整`;

@@ -20,6 +20,7 @@ export default class MenuBox extends React.Component {
                     首页
                 </div>
                 <div className={style.item}>
+                    <i className={[style.icon, style.users].join(" ")} />
                     添加记录
                 </div>
                 <div className={style.item}>

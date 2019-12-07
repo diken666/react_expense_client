@@ -27,6 +27,7 @@
   box-sizing: border-box;
   cursor: pointer;
   user-select: none;
+  border-left: 3px solid transparent;
 
   &:hover {
     background: rgb(30,43,60);
@@ -34,6 +35,7 @@
 }
 .itemActive{
   border-left: 3px solid rgb(92,206,198);
+  background: rgb(30,43,60);
 }
 
 .icon{
@@ -44,5 +46,9 @@
 }
 .home{
   background: url("../img/home.png");
+  background-size: 20px;
+}
+.users{
+  background: url("../img/users.png");
   background-size: 20px;
 }
