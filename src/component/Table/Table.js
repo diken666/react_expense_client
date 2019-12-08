@@ -20,6 +20,8 @@ export default class Table extends React.Component {
             submitLoading: false,     // 提交按钮的loading状态
             recordData: [],
             roomData: {},
+            recordDataObj: {},
+            roomDataArr: [],
             nowRoomData: {},
             nowRoom: '',
             nowType: '',
@@ -32,23 +34,65 @@ export default class Table extends React.Component {
             elecPrice: 1.00,
             startDate: moment(Date.now()).format('YYYY-MM-DD'),
             endDate: moment(Date.now()).format('YYYY-MM-DD')
-        }
+
+        };
+        this.dataInit = this.dataInit.bind(this);
     }
+
 
     componentDidMount() {
         this.userRecordInit().then();
+        this.dataInit().then();
         this.setState({
             nowRoomData: this.nowRoomDataInit()
         })
     }
 
+    async getRoomInfo() {
+        return await Common.getAsyncData(router.getRoomInfo)
+    }
 
-   async getAllRoomUser() {
+    async getRecentRecord() {
+        return await Common.getAsyncData(router.getRecentRecord)
+    }
+
+    async getAllRoomUser() {
         return await Common.getAsyncData(router.getAllRoomUser)
     }
     async getRecentRecordDate() {
         return await Common.getAsyncData(router.getRecentRecordDate);
     }
+
+    async dataInit(){
+        let result = {};
+        let roomData = await this.getRoomInfo();
+        for ( let i=0; i<roomData.length; i++ ) {
+            if( result[roomData[i].rid] ) {
+                result[roomData[i].rid].dataArr.push({
+                    uid: roomData[i].uid,
+                    uname: roomData[i].uname,
+                    class: roomData[i].class
+                })
+            } else {
+                result[roomData[i].rid] = {};
+                let dataArr = [];
+                dataArr.push({
+                    uid: roomData[i].uid,
+                    uname: roomData[i].uname,
+                    class: roomData[i].class
+                });
+                result[roomData[i].rid].dataArr = dataArr;
+            }
+        }
+        let recordData = await this.getRecentRecord();
+        this.setState({
+            recordDataObj: Common.arrToObj(recordData),
+            roomDataArr: Common.objToArr(result)
+        })
+    }
+
+
+
 
     async userRecordInit() {
         let data = await this.getAllRoomUser();
@@ -169,7 +213,7 @@ export default class Table extends React.Component {
                                 >
                                     <i className={style.editable}/>
                                     {
-                                        this.recordRender(this.props.recordData[item.name].water, this.state.nowRoomData[item.name].water)
+                                        this.recordRender(this.state.recordDataObj[item.name].water, this.state.nowRoomData[item.name].water)
                                     }
                                 </td>
                                 <td
@@ -180,7 +224,7 @@ export default class Table extends React.Component {
                                 >
                                     <i className={style.editable}/>
                                     {
-                                        this.recordRender(this.props.recordData[item.name].elec, this.state.nowRoomData[item.name].elec)
+                                        this.recordRender(this.state.recordDataObj[item.name].elec, this.state.nowRoomData[item.name].elec)
                                     }
                                 </td>
                                 <td
@@ -286,13 +330,13 @@ export default class Table extends React.Component {
                         >
                             <i className={style.editable}/>
                             {
-                                this.recordRender(this.props.recordData[item.name].water, this.state.nowRoomData[item.name].water)
+                                this.recordRender(this.state.recordDataObj[item.name].water, this.state.nowRoomData[item.name].water)
                             }
                         </td>
                         <td title={"本期电表数和上期电表数"} className={style.pointer} onClick={()=> this.tableTdClick(item.name, 'elec')}>
                             <i className={style.editable}/>
                             {
-                                this.recordRender(this.props.recordData[item.name].elec, this.state.nowRoomData[item.name].elec)
+                                this.recordRender(this.state.recordDataObj[item.name].elec, this.state.nowRoomData[item.name].elec)
                             }
                         </td>
                         <td title={"本期用电和本期用水"}>
@@ -324,7 +368,7 @@ export default class Table extends React.Component {
     }
 
     tableTdClick(nowRoom, type) {
-        let lastDataShow = ( type === 'elec' ? this.props.recordData[nowRoom].elec : this.props.recordData[nowRoom].water);
+        let lastDataShow = ( type === 'elec' ? this.state.recordDataObj[nowRoom].elec : this.state.recordDataObj[nowRoom].water);
         this.setState({
             visible: true,
             nowRoom,
@@ -381,17 +425,17 @@ export default class Table extends React.Component {
         let lastDataShow = this.state.lastDataShow;
         let nowDataShow = this.state.nowDataShow;
         if ( nowDataShow >= lastDataShow ) {
-            let roomData = this.props.roomData;
+            let roomData = this.state.roomDataArr;
             let nowRoom = this.state.nowRoom;
             let nowType = this.state.nowType;
             let tempNowRoomData = this.state.nowRoomData;
             tempNowRoomData[nowRoom][nowType] = nowDataShow;
 
             if ( nowType === 'water' ) {
-                tempNowRoomData[nowRoom]['nowWaterSpd'] = nowDataShow - this.props.recordData[nowRoom].water;
+                tempNowRoomData[nowRoom]['nowWaterSpd'] = nowDataShow - this.state.recordDataObj[nowRoom].water;
                 tempNowRoomData[nowRoom]['nowWaterCost'] = Math.floor(tempNowRoomData[nowRoom]['nowWaterSpd'] * this.state.waterPrice * 100) / 100;
             } else if ( nowType === 'elec') {
-                tempNowRoomData[nowRoom]['nowElecSpd'] = nowDataShow - this.props.recordData[nowRoom].elec;
+                tempNowRoomData[nowRoom]['nowElecSpd'] = nowDataShow - this.state.recordDataObj[nowRoom].elec;
                 tempNowRoomData[nowRoom]['nowElecCost'] = Math.floor(tempNowRoomData[nowRoom]['nowElecSpd'] * this.state.elecPrice * 100) / 100;
             }
 
@@ -465,11 +509,13 @@ export default class Table extends React.Component {
             nowRoomData: this.nowRoomDataInit()
         })
     }
+
     configBoxCancel(){
         this.setState({
             configBoxVisible: false
         })
     }
+
     disabledDate(current){
         // 不能选今天之后的日期
         // 不能选上一次统计日之前的日子
@@ -515,7 +561,7 @@ export default class Table extends React.Component {
     }
 
 
-
+    // 提交表格内容
     submit() {
         let nowRoomData = { ...this.state.nowRoomData };
         let userRecord = { ...this.state.userRecord };
@@ -532,11 +578,10 @@ export default class Table extends React.Component {
         } else {
             this.setState({
                 submitLoading: true
+            }, ()=>{
+                Common.postData(nowRoomData, userRecord, router.saveTableCtn, this);
             })
         }
-
-        Common.postData(nowRoomData, userRecord, router.saveTableCtn);
-
     }
 
     tableClick(e) {
@@ -550,7 +595,7 @@ export default class Table extends React.Component {
         return (
             <div className={style.container}>
                 <div className={style.title}>
-                    <span>2019-10-27</span>至<span>{this.state.endDate}</span>水电统计
+                    <span>{this.state.startDate}</span>至<span>{this.state.endDate}</span>水电统计
                     <i className={style.icon} title={"设置"} onClick={()=>this.setClick()} />
                 </div>
                 <div className={style.des}>
@@ -575,7 +620,7 @@ export default class Table extends React.Component {
                     </thead>
                     <tbody className={style.tbody}>
                     {
-                        this.tableRender(this.props.roomData)
+                        this.tableRender(this.state.roomDataArr)
                     }
                     </tbody>
                 </table>

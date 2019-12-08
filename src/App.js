@@ -13,9 +13,11 @@ class App extends React.Component{
     constructor ( props ) {
         super(props);
         this.state = {
-            userState: 'loading'
+            userState: 'loading',
+            menuItemIndex: 1
         };
-        this.userStateChange = this.userStateChange.bind(this)
+        this.userStateChange = this.userStateChange.bind(this);
+        this.menuItemChange = this.menuItemChange.bind(this);
     }
     async componentDidMount(){
         let state = await this.getUserState();
@@ -24,6 +26,7 @@ class App extends React.Component{
             loginLoading: false
         })
     }
+
     getUserState(){
         return axios.get(router.getUserState);
     }
@@ -31,6 +34,12 @@ class App extends React.Component{
     userStateChange(userState){
         this.setState({
             userState
+        })
+    }
+
+    menuItemChange(index){
+        this.setState({
+            menuItemIndex: index
         })
     }
 
@@ -50,8 +59,8 @@ class App extends React.Component{
                     <Layout>
                         <Header userStateChange={this.userStateChange} />
                         <Layout>
-                            <MenuBox />
-                            <RightBox />
+                            <MenuBox menuItemChange={this.menuItemChange} />
+                            <RightBox menuItemIndex={this.state.menuItemIndex} />
                         </Layout>
                     </Layout>
                 );

@@ -20,7 +20,7 @@ export default class Common{
     }
 
     // 提交数据
-    static postData(roomData, userRecord, url) {
+    static postData(roomData, userRecord, url, that) {
         let roomDataStr = JSON.stringify(roomData);
         let userRecordStr = JSON.stringify(userRecord);
         axios.post(url, {
@@ -30,11 +30,42 @@ export default class Common{
         })
             .then(res=>{
                 if ( res.data.state === 'ok') {
-                    message.success('提交成功')
+                    message.success('提交成功');
                 } else {
-                    message.success('提交失败')
+                    message.warn('提交失败')
                 }
-                console.log('res=>',res);
+                that.setState({
+                    submitLoading: false
+                })
             })
+    }
+
+    static objToArr(data) {
+        let roomA = [];
+        let roomB = [];
+        for ( let i=1; i<=13; i++ ) {
+            let index = i.toString()[1] ? i.toString(): "0"+i.toString()[0];
+            data[`A${index}`] ?
+                roomA.push({ name: `A${index}`, data: data[`A${index}`].dataArr })
+                : roomA.push({ name: `A${index}`, data: [] });
+
+            data[`B${index}`] ?
+                roomB.push({ name: `B${index}`, data: data[`B${index}`].dataArr })
+                : roomB.push({ name: `B${index}`, data: [] })
+        }
+        return [...roomA, ...roomB];
+    }
+
+
+    static arrToObj(arr) {
+        let res = {};
+        for ( let i=0; i<arr.length; i++ ) {
+            res[arr[i].rid] = {
+                water: arr[i].water,
+                elec: arr[i].elec,
+                date: arr[i].date
+            }
+        }
+        return res
     }
 }

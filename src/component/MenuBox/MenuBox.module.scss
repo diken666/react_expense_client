@@ -16,6 +16,11 @@
   text-align: center;
   user-select: none;
 }
+
+.borderBottom{
+  border-bottom: 1px dotted #888;
+}
+
 .item{
   position: relative;
   display: flex;
@@ -50,5 +55,9 @@
 }
 .users{
   background: url("../img/users.png");
+  background-size: 20px;
+}
+.addRecord{
+  background: url("../img/addRecord.png");
   background-size: 20px;
 }

@@ -8,25 +8,45 @@ export default class MenuBox extends React.Component {
     constructor( props ) {
         super(props);
         this.state = {
-
+            itemIndex: 1
         }
+    }
+    itemIndexChange(index){
+        this.setState({
+            itemIndex: index
+        })
     }
     render() {
         return (
             <Sider className={style.menuBox}>
                 <i className={style.title} />
-                <div className={[style.item, style.itemActive].join(" ")}>
+                <div className={[style.item, style.borderBottom, this.state.itemIndex === 1 ? style.itemActive: ''].join(" ")}
+                    onClick={()=>{
+                        this.itemIndexChange(1);
+                        this.props.menuItemChange(1);
+                    }}
+                >
                     <i className={[style.icon, style.home].join(" ")} />
                     首页
                 </div>
-                <div className={style.item}>
+                <div className={[style.item, this.state.itemIndex === 2 ? style.itemActive: ''].join(" ")}
+                     onClick={()=>{
+                         this.itemIndexChange(2);
+                         this.props.menuItemChange(2);
+                     }}
+                >
+                    <i className={[style.icon, style.addRecord].join(" ")} />
+                        添加记录
+                </div>
+                <div className={[style.item, this.state.itemIndex === 3 ? style.itemActive: ''].join(" ")}
+                     onClick={()=>{
+                         this.itemIndexChange(3);
+                         this.props.menuItemChange(3);
+                     }}
+                >
                     <i className={[style.icon, style.users].join(" ")} />
-                    添加记录
+                    住户管理
                 </div>
-                <div className={style.item}>
-                    修改成员
-                </div>
-                <div className={style.item}>1</div>
             </Sider>
         )
     }
