@@ -44,6 +44,15 @@ export default class MenuBox extends React.Component {
                          this.props.menuItemChange(3);
                      }}
                 >
+                    <i className={[style.icon, style.searchRecord].join(" ")} />
+                    查看记录
+                </div>
+                <div className={[style.item, this.state.itemIndex === 4 ? style.itemActive: ''].join(" ")}
+                     onClick={()=>{
+                         this.itemIndexChange(4);
+                         this.props.menuItemChange(4);
+                     }}
+                >
                     <i className={[style.icon, style.users].join(" ")} />
                     住户管理
                 </div>

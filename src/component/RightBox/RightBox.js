@@ -2,6 +2,7 @@ import React from 'react';
 import style from './RightBox.module.scss';
 import { Layout } from 'antd';
 import Table from "../Table/Table";
+import SearchTable from "../SearchTable/SearchTable";
 const { Content } = Layout;
 
 export default class RightBox extends React.Component {
@@ -20,7 +21,7 @@ export default class RightBox extends React.Component {
         switch (index) {
             case 1: return '1';
             case 2: return <Table />;
-            case 3: return '3';
+            case 3: return <SearchTable />;
             default:
                 return 'default';
         }
