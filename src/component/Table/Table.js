@@ -579,7 +579,7 @@ export default class Table extends React.Component {
             this.setState({
                 submitLoading: true
             }, ()=>{
-                Common.postData(nowRoomData, userRecord, router.saveTableCtn, this);
+                Common.postData(nowRoomData, userRecord, this.state.endDate, router.saveTableCtn, this);
             })
         }
     }

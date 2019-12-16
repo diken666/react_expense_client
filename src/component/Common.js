@@ -20,13 +20,14 @@ export default class Common{
     }
 
     // 提交数据
-    static postData(roomData, userRecord, url, that) {
+    static postData(roomData, userRecord, endDate,  url, that) {
         let roomDataStr = JSON.stringify(roomData);
         let userRecordStr = JSON.stringify(userRecord);
         axios.post(url, {
             roomData: roomDataStr,
             userRecord: userRecordStr,
-            date: moment().format('YYYY-MM-DD')    // 提交的日期，默认今天
+            endDate,
+            nowDate: moment().format('YYYY-MM-DD')    // 提交的日期，默认今天
         })
             .then(res=>{
                 if ( res.data.state === 'ok') {
