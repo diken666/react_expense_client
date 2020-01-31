@@ -4,7 +4,6 @@ export default class VergifyGraph {
         this.store = 'abcdefghigkmnpqrstuvwxyz23456789';
         this.validStr = '';
         this.ctx = this.bindDom.getContext('2d');
-
         this.initValidStr()
     }
 

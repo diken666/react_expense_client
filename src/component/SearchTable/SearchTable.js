@@ -2,7 +2,6 @@ import React from 'react';
 import style from './SearchTable.module.scss';
 import { Select, Input } from 'antd';
 const { Option } = Select;
-const { Search } = Input;
 
 export default class SearchTable extends React.Component {
     constructor(props){
