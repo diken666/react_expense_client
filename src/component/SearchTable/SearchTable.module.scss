@@ -35,3 +35,37 @@ table.gridtable td {
   }
 
 }
+.btnBox {
+  font-size: 12px;
+
+}
+.btn {
+  display: inline-block;
+  padding: 0 20px;
+  height: 40px;
+  line-height: 40px;
+  color: #333333;
+  background: #dedede;
+  border-left: 1px solid #eee;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+
+  &:first-child {
+    border-left: none;
+    border-radius: 20px 0 0 20px ;
+  }
+  &:last-child {
+    border-radius: 0 20px 20px 0 ;
+  }
+
+  &:hover {
+    background: #1890ff;
+    color: #fff;
+  }
+}
+
+.btnActive {
+  background: #1890ff;
+  color: #fff;
+}

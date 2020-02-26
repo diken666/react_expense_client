@@ -15,9 +15,18 @@ export default class SearchTable extends React.Component {
 
     }
 
+    btnClick() {
+        alert('hello')
+    }
+
     render() {
         return (
             <div className={style.container}>
+                <div className={style.btnBox}>
+                    <div className={[style.btn, style.btnActive].join(' ')} onClick={()=>this.btnClick()}>按钮1</div>
+                    <div className={style.btn} onClick={()=>this.btnClick()}>按钮2</div>
+                    <div className={style.btn} onClick={()=>this.btnClick()}>按钮3</div>
+                </div> 
                 <div className={style.searchItem}>
                     <span>查看内容：</span>
                     <Select defaultValue="allRoomData" style={{ width: 130 }} onChange={()=>this.selectChange()}>
