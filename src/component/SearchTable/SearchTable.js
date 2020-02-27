@@ -15,17 +15,24 @@ export default class SearchTable extends React.Component {
 
     }
 
-    btnClick() {
-        alert('hello')
+    btnClick(index) {
+        let btns = document.getElementsByClassName(style.btn);
+        for( let i=0; i<btns.length; i++ ) {
+            if( i !== index ) {
+                btns[i].classList.remove(style.btnActive);
+                continue;
+            }
+            btns[i].classList.add(style.btnActive);
+        }
     }
 
     render() {
         return (
             <div className={style.container}>
                 <div className={style.btnBox}>
-                    <div className={[style.btn, style.btnActive].join(' ')} onClick={()=>this.btnClick()}>按钮1</div>
-                    <div className={style.btn} onClick={()=>this.btnClick()}>按钮2</div>
-                    <div className={style.btn} onClick={()=>this.btnClick()}>按钮3</div>
+                    <div className={[style.btn, style.btnActive].join(' ')} onClick={()=>this.btnClick(0)}>按钮1</div>
+                    <div className={style.btn} onClick={()=>this.btnClick(1)}>按钮2</div>
+                    <div className={style.btn} onClick={()=>this.btnClick(2)}>按钮3</div>
                 </div> 
                 <div className={style.searchItem}>
                     <span>查看内容：</span>
