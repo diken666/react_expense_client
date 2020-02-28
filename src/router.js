@@ -10,4 +10,5 @@ export default {
     getAllRoomUser: url + '/getallroomuser',      // 获取所有住户信息
     getRecentRecordDate: url + '/getRecentRecordDate',  // 获取最近统计日期
     saveTableCtn: url + '/saveTableCtn',   // 保存表格内容
+    getDefaultRoomInfo: url + '/getDefaultRoomInfo',  // 获取默认的房间信息
 }

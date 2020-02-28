@@ -1,6 +1,8 @@
 import React from 'react';
 import style from './SearchTable.module.scss';
 import { Select } from 'antd';
+import axios from 'axios';
+import router from '../../router';
 const { Option } = Select;
 
 export default class SearchTable extends React.Component {
@@ -17,6 +19,7 @@ export default class SearchTable extends React.Component {
 
     btnClick(index) {
         let btns = document.getElementsByClassName(style.btn);
+        
         for( let i=0; i<btns.length; i++ ) {
             if( i !== index ) {
                 btns[i].classList.remove(style.btnActive);
@@ -24,6 +27,11 @@ export default class SearchTable extends React.Component {
             }
             btns[i].classList.add(style.btnActive);
         }
+    }
+
+
+    componentDidMount() {
+        console.log(axios.get(router.getDefaultRoomInfo))
     }
 
     render() {
