@@ -1,15 +1,48 @@
 import React from 'react';
 import style from './SearchTable.module.scss';
-import { Select } from 'antd';
+import { Table } from 'antd';
 import axios from 'axios';
 import router from '../../router';
-const { Option } = Select;
 
 export default class SearchTable extends React.Component {
     constructor(props){
         super(props);
         this.state = {
-
+            roomData: [],
+            tableColumn: [
+                {
+                    title: '房间号',
+                    dataIndex: 'rid'
+                }, {
+                    title: '本期水表数',
+                    dataIndex: 'water',
+                    sorter: (a, b) => a.water - b.water,
+                }, {
+                    title: '本期电表数',
+                    dataIndex: 'elec',
+                    sorter: (a, b) => a.elec - b.elec,
+                }, {
+                    title: '本期用水(吨)',
+                    dataIndex: 'waterCost',
+                    sorter:  (a, b) => a.waterCost - b.waterCost,
+                }, {
+                    title: '本期用电(度)',
+                    dataIndex: 'elecCost',
+                    sorter: (a, b) => a.elecCost - b.elecCost,
+                }, {
+                    title: '本期水费(元)',
+                    dataIndex: 'waterPrice',
+                    sorter: (a, b) => a.waterPrice - b.waterPrice,
+                }, {
+                    title: '本期电费(元)',
+                    dataIndex: 'elecPrice',
+                    sorter: (a, b) => a.elecPrice - b.elecPrice,
+                }, {
+                    title: '费用总计(元)',
+                    dataIndex: 'totalPrice',
+                    sorter: (a, b) => a.totalPrice - b.totalPrice,
+                }
+            ]
         }
     }
 
@@ -31,54 +64,63 @@ export default class SearchTable extends React.Component {
 
 
     componentDidMount() {
-        console.log(axios.get(router.getDefaultRoomInfo))
+        this.setDefaultRoomInfo();
+    }
+
+    async setDefaultRoomInfo() {
+        let data = await axios.get(router.getDefaultRoomInfo);
+        data.data.state === 'ok' ? this.setState({ roomData: data.data.data }) 
+        : this.setState({ roomData: []})
+        console.log(data.data.data)
+    }
+
+    tipRender() {
+        if ( this.state.roomData[0] && this.state.roomData[0].date ) {
+            return (
+            <p className={style.tips}>统计日期：{this.state.roomData[0].date} </p>
+            )
+        }
+    }
+
+    onChange(pagination, filters, sorter, extra) {
+        console.log('params', pagination, filters, sorter, extra);
     }
 
     render() {
         return (
             <div className={style.container}>
+                
                 <div className={style.btnBox}>
                     <div className={[style.btn, style.btnActive].join(' ')} onClick={()=>this.btnClick(0)}>默认</div>
                     <div className={style.btn} onClick={()=>this.btnClick(1)}>按钮2</div>
                     <div className={style.btn} onClick={()=>this.btnClick(2)}>按钮3</div>
                 </div> 
+                { this.tipRender() }
+                <Table columns={this.state.tableColumn} 
+                  dataSource={this.state.roomData} 
+                  rowKey='rid' 
+                  onChange={this.onChange} 
+                  bordered 
+                />
                 <div className={style.searchItem}>
-                    <span>查看内容：</span>
+                    {/* <span>查看内容：</span>
                     <Select defaultValue="allRoomData" style={{ width: 130 }} onChange={()=>this.selectChange()}>
                         <Option value="allRoomData">所有房间数据</Option>
                         <Option value="roomData">单个房间数据</Option>
                         <Option value="allPersonData">所有住户数据</Option>
                         <Option value="personData">单个用户数据</Option>
-                    </Select>
+                    </Select> */}
 
                     {/*<Search placeholder="input search text" onSearch={value => console.log(value)} enterButton />*/}
                 </div>
-                <div className={style.searchItem}>
+                {/* <div className={style.searchItem}>
                     <span>日期选择：</span>
                     <Select defaultValue="allRoomData" style={{ width: 240 }} onChange={()=>this.selectChange()}>
                         <Option value="allRoomData">2019-9-27 至 2019-10-27</Option>
                         <Option value="roomData">2019-10-27 至 2019-11-25</Option>
                         <Option value="allPersonData">2019-11-25 至 2019-12-25</Option>
                     </Select>
-                </div>
-                <table className={style.gridtable}  onClick={(e)=>this.tableClick(e)}>
-                    <thead>
-                        <tr>
-                            <th>房间号</th>
-                            <th>上期水表数</th>
-                            <th>本期水表数</th>
-                            <th>本期电表数</th>
-                            <th>本期电表数</th>
-                            <th>本期用水(吨)</th>
-                            <th>本期用电(度)</th>
-                            <th>本期水费(元)</th>
-                            <th>本期电费(元)</th>
-                            <th>费用总计(元)</th>
-                        </tr>
-                    </thead>
-                    <tbody className={style.tbody}>
-                    </tbody>
-                </table>
+                </div> */}
             </div>
         )
     }
