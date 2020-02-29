@@ -92,8 +92,8 @@ export default class SearchTable extends React.Component {
                 
                 <div className={style.btnBox}>
                     <div className={[style.btn, style.btnActive].join(' ')} onClick={()=>this.btnClick(0)}>默认</div>
-                    <div className={style.btn} onClick={()=>this.btnClick(1)}>按钮2</div>
-                    <div className={style.btn} onClick={()=>this.btnClick(2)}>按钮3</div>
+                    <div className={style.btn} onClick={()=>this.btnClick(1)}>房间消费记录</div>
+                    <div className={style.btn} onClick={()=>this.btnClick(2)}>人员消费记录</div>
                 </div> 
                 { this.tipRender() }
                 <Table columns={this.state.tableColumn} 
