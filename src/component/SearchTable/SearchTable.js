@@ -8,6 +8,7 @@ export default class SearchTable extends React.Component {
     constructor(props){
         super(props);
         this.state = {
+            tabIndex: 0,
             roomData: [],
             tableColumn: [
                 {
@@ -52,6 +53,10 @@ export default class SearchTable extends React.Component {
 
     btnClick(index) {
         let btns = document.getElementsByClassName(style.btn);
+        switch (index) {
+            case 0:
+            case 1:
+        }
         
         for( let i=0; i<btns.length; i++ ) {
             if( i !== index ) {
@@ -60,6 +65,9 @@ export default class SearchTable extends React.Component {
             }
             btns[i].classList.add(style.btnActive);
         }
+        this.setState({
+            tabIndex: index
+        })
     }
 
 
@@ -75,7 +83,7 @@ export default class SearchTable extends React.Component {
     }
 
     tipRender() {
-        if ( this.state.roomData[0] && this.state.roomData[0].date ) {
+        if ( this.state.roomData[0] && this.state.roomData[0].date && this.state.tabIndex === 0) {
             return (
             <p className={style.tips}>统计日期：{this.state.roomData[0].date} </p>
             )
