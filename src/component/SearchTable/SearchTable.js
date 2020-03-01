@@ -1,6 +1,6 @@
 import React from 'react';
 import style from './SearchTable.module.scss';
-import { Table } from 'antd';
+import { Table, Modal, AutoComplete } from 'antd';
 import axios from 'axios';
 import router from '../../router';
 
@@ -10,6 +10,9 @@ export default class SearchTable extends React.Component {
         this.state = {
             tabIndex: 0,
             roomData: [],
+            isRoomCostVisible: false,
+            ridArr: ['A01', 'A02', 'B03'], 
+            ridVal: '',
             tableColumn: [
                 {
                     title: '房间号',
@@ -45,6 +48,8 @@ export default class SearchTable extends React.Component {
                 }
             ]
         }
+        this.roomCostHandleCancle = this.roomCostHandleCancle.bind(this);
+        this.ridOnSearch = this.ridOnSearch.bind(this);
     }
 
     selectChange() {
@@ -55,7 +60,13 @@ export default class SearchTable extends React.Component {
         let btns = document.getElementsByClassName(style.btn);
         switch (index) {
             case 0:
+                this.setDefaultRoomInfo();
+                break;
             case 1:
+                this.setState({
+                    isRoomCostVisible: true
+                })
+                console.log("ok1")
         }
         
         for( let i=0; i<btns.length; i++ ) {
@@ -75,12 +86,42 @@ export default class SearchTable extends React.Component {
         this.setDefaultRoomInfo();
     }
 
+    // 获取默认的房间信息
     async setDefaultRoomInfo() {
         let data = await axios.get(router.getDefaultRoomInfo);
         data.data.state === 'ok' ? this.setState({ roomData: data.data.data }) 
         : this.setState({ roomData: []})
         console.log(data.data.data)
     }
+
+    // 获取房间消费信息
+    async setRoomCost() {
+
+    }
+
+    roomCostHandleOK() {
+
+    }
+
+    roomCostHandleCancle() {
+        this.setState({
+            isRoomCostVisible: false
+        })
+    }
+
+    ridOnSelect(data) {
+        console.log('onSelect', data);
+    };
+    
+    // ridOnChange(data) {
+    //     console.log("---> ",  data);
+    // };
+    ridOnSearch() {
+        this.setState({
+
+        })
+    }
+
 
     tipRender() {
         if ( this.state.roomData[0] && this.state.roomData[0].date && this.state.tabIndex === 0) {
@@ -97,7 +138,6 @@ export default class SearchTable extends React.Component {
     render() {
         return (
             <div className={style.container}>
-                
                 <div className={style.btnBox}>
                     <div className={[style.btn, style.btnActive].join(' ')} onClick={()=>this.btnClick(0)}>默认</div>
                     <div className={style.btn} onClick={()=>this.btnClick(1)}>房间消费记录</div>
@@ -110,6 +150,19 @@ export default class SearchTable extends React.Component {
                   onChange={this.onChange} 
                   bordered 
                 />
+                <Modal
+                    title="请输入房间号"
+                    visible={this.state.isRoomCostVisible}
+                    onOk={this.roomCostHandleOK}
+                    onCancel={this.roomCostHandleCancle}
+                >
+                    <AutoComplete
+                        options={this.state.ridArr}
+                        onSelect={this.ridOnSelect}
+                        // onChange={this.ridOnSelect}
+                        onSearch={this.ridOnSearch}
+                    />
+                </Modal>
             </div>
         )
     }
