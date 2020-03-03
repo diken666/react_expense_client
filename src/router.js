@@ -11,4 +11,5 @@ export default {
     getRecentRecordDate: url + '/getRecentRecordDate',  // 获取最近统计日期
     saveTableCtn: url + '/saveTableCtn',   // 保存表格内容
     getDefaultRoomInfo: url + '/getDefaultRoomInfo',  // 获取默认的房间信息
+    getRoomCost: url + '/getRoomCost',  //获取房间消费信息
 }

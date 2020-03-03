@@ -1,8 +1,12 @@
 import React from 'react';
 import style from './SearchTable.module.scss';
-import { Table, Modal, AutoComplete } from 'antd';
+import { Table, Modal, AutoComplete, Input, ConfigProvider } from 'antd';
 import axios from 'axios';
 import router from '../../router';
+import zh_CN from 'antd/lib/locale-provider/zh_CN';
+import moment from 'moment';
+// import 'moment/locale/zh-cn';
+moment.locale('zh-cn');
 
 export default class SearchTable extends React.Component {
     constructor(props){
@@ -13,6 +17,7 @@ export default class SearchTable extends React.Component {
             isRoomCostVisible: false,
             ridArr: ['A01', 'A02', 'B03'], 
             ridVal: '',
+            searchCtn: '',
             tableColumn: [
                 {
                     title: '房间号',
@@ -49,7 +54,9 @@ export default class SearchTable extends React.Component {
             ]
         }
         this.roomCostHandleCancle = this.roomCostHandleCancle.bind(this);
-        this.ridOnSearch = this.ridOnSearch.bind(this);
+        // this.ridOnSearch = this.ridOnSearch.bind(this);
+        this.InputSearchChange = this.InputSearchChange.bind(this);
+        this.roomCostHandleOK = this.roomCostHandleOK.bind(this);
     }
 
     selectChange() {
@@ -95,12 +102,18 @@ export default class SearchTable extends React.Component {
     }
 
     // 获取房间消费信息
-    async setRoomCost() {
-
+    async getRoomCost(rid) {
+       let data = await axios.get(router.getRoomCost, {
+            params: {
+                rid
+            }
+        })
+        console.log(data)
     }
 
     roomCostHandleOK() {
-
+        let rid = this.state.searchCtn;
+        this.getRoomCost(rid);
     }
 
     roomCostHandleCancle() {
@@ -109,18 +122,23 @@ export default class SearchTable extends React.Component {
         })
     }
 
-    ridOnSelect(data) {
-        console.log('onSelect', data);
-    };
-    
-    // ridOnChange(data) {
-    //     console.log("---> ",  data);
-    // };
-    ridOnSearch() {
-        this.setState({
-
-        })
+    InputSearchChange(e) {
+        e.target ? 
+        this.setState({ searchCtn: e.target.value }) 
+        :
+        this.setState({ searchCtn: '' })
     }
+
+    // ridOnSelect(data) {
+    //     console.log('onSelect', data);
+    // };
+    
+    
+    // ridOnSearch() {
+    //     this.setState({
+
+    //     })
+    // }
 
 
     tipRender() {
@@ -150,19 +168,27 @@ export default class SearchTable extends React.Component {
                   onChange={this.onChange} 
                   bordered 
                 />
-                <Modal
-                    title="请输入房间号"
-                    visible={this.state.isRoomCostVisible}
-                    onOk={this.roomCostHandleOK}
-                    onCancel={this.roomCostHandleCancle}
-                >
-                    <AutoComplete
-                        options={this.state.ridArr}
-                        onSelect={this.ridOnSelect}
-                        // onChange={this.ridOnSelect}
-                        onSearch={this.ridOnSearch}
-                    />
-                </Modal>
+                <ConfigProvider locale={zh_CN}>
+                    <Modal
+                        title="请输入房间号"
+                        visible={this.state.isRoomCostVisible}
+                        onOk={this.roomCostHandleOK}
+                        onCancel={this.roomCostHandleCancle}
+                        centered
+                    >
+                        {/* <AutoComplete
+                            options={this.state.ridArr}
+                            onSelect={this.ridOnSelect}
+                            // onChange={this.ridOnSelect}
+                            onSearch={this.ridOnSearch}
+                        /> */}
+                        <div> 
+                            <Input addonBefore="房间号" autoFocus 
+                              onChange={this.InputSearchChange} 
+                            />  
+                        </div>
+                    </Modal>
+                </ConfigProvider>
             </div>
         )
     }

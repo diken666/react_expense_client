@@ -3,7 +3,7 @@ import style from './Table.module.scss';
 import {Input, message, Modal, DatePicker, ConfigProvider, Button} from "antd";
 import zh_CN from 'antd/lib/locale-provider/zh_CN';
 import moment from 'moment';
-import 'moment/locale/zh-cn';
+// import 'moment/locale/zh-cn';
 import router from "../../router";
 import Common from "../Common";
 moment.locale('zh-cn');
