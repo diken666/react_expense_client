@@ -14,7 +14,10 @@ export default class SearchTable extends React.Component {
         this.state = {
             tabIndex: 0,
             roomData: [],
+            singleRoomData: [],
             isRoomCostVisible: false,
+            isRoomDefaultTableShow: true,
+            isSingleRoomTableShow: false,
             ridArr: ['A01', 'A02', 'B03'], 
             ridVal: '',
             searchCtn: '',
@@ -51,6 +54,41 @@ export default class SearchTable extends React.Component {
                     dataIndex: 'totalPrice',
                     sorter: (a, b) => a.totalPrice - b.totalPrice,
                 }
+            ],
+            singleTableColumn: [
+                {
+                    title: '日期',
+                    dataIndex: 'date',
+                    sorter: (a, b) => a.date - b.date,
+                }, {
+                    title: '本期水表数',
+                    dataIndex: 'waterRecord',
+                    sorter: (a, b) => a.waterRecord - b.waterRecord,
+                }, {
+                    title: '本期电表数',
+                    dataIndex: 'elecRecord',
+                    sorter: (a, b) => a.elecRecord - b.elecRecord,
+                }, {
+                    title: '本期用水(吨)',
+                    dataIndex: 'water',
+                    sorter:  (a, b) => a.water - b.water,
+                }, {
+                    title: '本期用电(度)',
+                    dataIndex: 'elec',
+                    sorter: (a, b) => a.elec - b.elec,
+                }, {
+                    title: '本期水费(元)',
+                    dataIndex: 'waterSpd',
+                    sorter: (a, b) => a.waterSpd - b.waterSpd,
+                }, {
+                    title: '本期电费(元)',
+                    dataIndex: 'elecSpd',
+                    sorter: (a, b) => a.elecSpd - b.elecSpd,
+                }, {
+                    title: '费用总计(元)',
+                    dataIndex: 'totalPrice',
+                    sorter: (a, b) => a.totalPrice - b.totalPrice,
+                }
             ]
         }
         this.roomCostHandleCancle = this.roomCostHandleCancle.bind(this);
@@ -74,6 +112,9 @@ export default class SearchTable extends React.Component {
                     isRoomCostVisible: true
                 })
                 console.log("ok1")
+                break;
+            default:
+                this.setDefaultRoomInfo();
         }
         
         for( let i=0; i<btns.length; i++ ) {
@@ -96,8 +137,18 @@ export default class SearchTable extends React.Component {
     // 获取默认的房间信息
     async setDefaultRoomInfo() {
         let data = await axios.get(router.getDefaultRoomInfo);
-        data.data.state === 'ok' ? this.setState({ roomData: data.data.data }) 
-        : this.setState({ roomData: []})
+        data.data.state === 'ok' ? 
+        this.setState({ 
+            roomData: data.data.data,
+            isRoomDefaultTableShow: true,
+            isSingleRoomTableShow: false
+         }) 
+        : 
+        this.setState({ 
+            roomData: [],
+            isRoomDefaultTableShow: true,
+            isSingleRoomTableShow: false
+        })
         console.log(data.data.data)
     }
 
@@ -108,12 +159,20 @@ export default class SearchTable extends React.Component {
                 rid
             }
         })
-        console.log(data)
+        this.setState({
+            singleRoomData: data.data.data,
+            isSingleRoomTableShow: true,
+            isRoomDefaultTableShow: false
+        })
+
     }
 
     roomCostHandleOK() {
-        let rid = this.state.searchCtn;
+        let rid = this.state.searchCtn.toUpperCase();
         this.getRoomCost(rid);
+        this.setState({
+            isRoomCostVisible: false
+        })
     }
 
     roomCostHandleCancle() {
@@ -142,10 +201,15 @@ export default class SearchTable extends React.Component {
 
 
     tipRender() {
-        if ( this.state.roomData[0] && this.state.roomData[0].date && this.state.tabIndex === 0) {
+        if ( this.state.roomData[0] && this.state.roomData[0].date && this.state.isRoomDefaultTableShow ) {
             return (
             <p className={style.tips}>统计日期：{this.state.roomData[0].date} </p>
             )
+        }
+        if ( this.state.singleRoomData[0] && this.state.singleRoomData[0].date && this.state.isSingleRoomTableShow ) {
+            return (
+                <p className={style.tips}>{this.state.searchCtn.toUpperCase()} 房间信息如下</p>
+                )
         }
     }
 
@@ -162,12 +226,22 @@ export default class SearchTable extends React.Component {
                     <div className={style.btn} onClick={()=>this.btnClick(2)}>人员消费记录</div>
                 </div> 
                 { this.tipRender() }
-                <Table columns={this.state.tableColumn} 
-                  dataSource={this.state.roomData} 
-                  rowKey='rid' 
-                  onChange={this.onChange} 
-                  bordered 
-                />
+                <div className={this.state.isRoomDefaultTableShow? style.show : style.hide}>
+                    <Table columns={this.state.tableColumn} 
+                    dataSource={this.state.roomData} 
+                    rowKey='rid' 
+                    onChange={this.onChange} 
+                    bordered 
+                    />
+                </div>
+                <div className={this.state.isSingleRoomTableShow ? style.show : style.hide }>
+                    <Table columns={this.state.singleTableColumn} 
+                    dataSource={this.state.singleRoomData} 
+                    rowKey='date' 
+                    onChange={this.onChange} 
+                    bordered
+                    />
+                </div>
                 <ConfigProvider locale={zh_CN}>
                     <Modal
                         title="请输入房间号"
