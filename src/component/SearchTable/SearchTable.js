@@ -95,6 +95,7 @@ export default class SearchTable extends React.Component {
         // this.ridOnSearch = this.ridOnSearch.bind(this);
         this.InputSearchChange = this.InputSearchChange.bind(this);
         this.roomCostHandleOK = this.roomCostHandleOK.bind(this);
+        this.InputSearchKeyUp = this.InputSearchKeyUp.bind(this);
     }
 
     selectChange() {
@@ -185,7 +186,14 @@ export default class SearchTable extends React.Component {
         e.target ? 
         this.setState({ searchCtn: e.target.value }) 
         :
-        this.setState({ searchCtn: '' })
+        this.setState({ searchCtn: '' });
+    }
+    InputSearchKeyUp(e) {
+        if ( e.keyCode && e.keyCode === 13 ) {
+            console.log("ok!!!");
+            this.roomCostHandleOK();
+        }
+        console.log(e.keyCode)
     }
 
     // ridOnSelect(data) {
@@ -259,6 +267,7 @@ export default class SearchTable extends React.Component {
                         <div> 
                             <Input addonBefore="房间号" autoFocus 
                               onChange={this.InputSearchChange} 
+                              onKeyUp={this.InputSearchKeyUp}
                             />  
                         </div>
                     </Modal>
